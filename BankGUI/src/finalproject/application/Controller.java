@@ -24,7 +24,7 @@ public class Controller {
 
     // GUI components
     private String accountType; // user selected account type during account creation
-    
+
     public TextField txtFirstName;
     public TextField txtLastName;
     public TextField txtEmail;
@@ -34,7 +34,7 @@ public class Controller {
     public MenuButton menuAccountType;
     public TextField txtSSN;
     public PasswordField txtPassword;
-    public Button btnCreateCustomer;
+    public Button btnCreateAccount;
     public Button btnLogin;
 
     public Controller() {
@@ -108,7 +108,7 @@ public class Controller {
     public void loadCreateCustomer() throws IOException {
         // load the create account scene
         Parent root = FXMLLoader.load(getClass().getResource("create_customer.fxml"));
-        Stage stage = (Stage)this.btnCreateCustomer.getScene().getWindow();
+        Stage stage = (Stage)this.btnCreateAccount.getScene().getWindow();
         stage.setScene(new Scene(root, 720, 480));
     }
 
@@ -163,27 +163,42 @@ public class Controller {
         this.accountType = "credit";
     };
 
-    public void createAccount() {
-        // get the values inputted into the text fields
+    // Attempts to create a new account on the server.
+    public void createAccount() throws IOException {
+        // get the values inputted into the data fields
         String ssn = txtSSN.getText();
+        String accountType = this.accountType;
 
-        // Request: account | create | [customerSsn] | [accountType]
-        // Response: {success/fail}
+        // send create customer request to the server and receive server's response.
+        String cmd = String.format("account|create|%s|%s", ssn, accountType);
+        String response = sendCommand(cmd);
 
-//        // set the new account as the current account
-//        currentAccountID = respArgs[1];
-//
-//        // get the new account's information
-//        this.getAccountInfo();
-//
-//        // load the main account scene
-//        Parent root = FXMLLoader.load(getClass().getResource(""));
-//        Stage stage = (Stage)this.btnCreateCustomer.getScene().getWindow();
-//        stage.setScene(new Scene(root, 720, 480));
+        // perform actions based on server's response
+        Alert alert;
+        String[] respArgs = response.split("\\|");
+        switch (respArgs[0]) {
+            case "success":
+                // set the new account as the current account
+                currentAccountID = respArgs[1];
 
-//        // display success alert
-//        alert = new Alert(Alert.AlertType.CONFIRMATION, "Successfully created customer.", ButtonType.OK);
-//        alert.show();
+                // get the new account's information
+                this.getAccountInfo();
+
+                // load the main account scene
+                Parent root = FXMLLoader.load(getClass().getResource("account_main.fxml"));
+                Stage stage = (Stage)this.btnCreateAccount.getScene().getWindow();
+                stage.setScene(new Scene(root, 720, 480));
+
+                // display success alert
+                alert = new Alert(Alert.AlertType.CONFIRMATION, "Successfully created account.", ButtonType.OK);
+                alert.show();
+                break;
+            case "fail":
+                // display failure alert with message from server
+                alert = new Alert(Alert.AlertType.ERROR, respArgs[1], ButtonType.OK);
+                alert.show();
+                break;
+        }
     }
 
     // request the current account's information from the server.
