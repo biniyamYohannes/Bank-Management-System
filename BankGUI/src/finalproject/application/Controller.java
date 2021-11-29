@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Controller {
+    // client data for current session
     private final Client client;
     private String firstName;
     private String lastName;
@@ -21,6 +22,7 @@ public class Controller {
     private String phone;
     private ArrayList<String> accountIDs;
 
+    // GUI components
     public TextField txtFirstName;
     public TextField txtLastName;
     public TextField txtEmail;
@@ -29,6 +31,7 @@ public class Controller {
     public TextField txtPhone;
     public MenuButton menuAccountType;
     public TextField txtSSN;
+    public PasswordField txtPassword;
     public Button btnCreateAccount;
     public Button btnLogin;
 
@@ -56,30 +59,30 @@ public class Controller {
     // Attempts to log into an account on the server with the provided credentials.
     public void login() throws IOException {
         // get the values inputted into the text fields
-        String firstName = txtFirstName.getText();
-        String ssn = txtSSN.getText();
+        String email = txtEmail.getText();
+        String password = txtPassword.getText();
 
         // send login request to the server and receive server's response.
         Alert alert;
-        String cmd = String.format("login|%s|%s", firstName, ssn);
+        String cmd = String.format("login|%s|%s", email, password);
         String response = sendCommand(cmd);
 
         // perform actions based on server's response
         String[] respArgs = response.split("\\|");
         switch (respArgs[0]) {
             case "success":
-                // save user data from the server
-                this.firstName = firstName;
-                this.lastName = respArgs[1];
-                this.email = respArgs[2];
-                this.dob = LocalDate.parse(respArgs[3]);
-                this.address = respArgs[4];
-                this.phone = respArgs[5];
-
-                // parse account IDs into an ArrayList
-                String accountIDsStr = respArgs[6];
-                String[] accountIDs =  accountIDsStr.replace("[","").replace("]","").split(",");
-                this.accountIDs = new ArrayList<>(Arrays.asList(accountIDs));
+//                // save user data from the server
+//                this.firstName = respArgs[1];
+//                this.lastName = respArgs[2];
+//                this.email = respArgs[3];
+//                this.dob = LocalDate.parse(respArgs[4]);
+//                this.address = respArgs[5];
+//                this.phone = respArgs[6];
+//
+//                // parse account IDs into an ArrayList
+//                String accountIDsStr = respArgs[7];
+//                String[] accountIDs =  accountIDsStr.replace("[","").replace("]","").split(",");
+//                this.accountIDs = new ArrayList<>(Arrays.asList(accountIDs));
 
                 // load the menu scene
                 Parent root = FXMLLoader.load(getClass().getResource("menu.fxml"));
