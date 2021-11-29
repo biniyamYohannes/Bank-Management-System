@@ -94,6 +94,7 @@ public class Controller {
                 alert.show();
                 break;
             case "fail":
+                // display failure alert with message from client
                 alert = new Alert(Alert.AlertType.ERROR, respArgs[1], ButtonType.OK);
                 alert.show();
                 break;
