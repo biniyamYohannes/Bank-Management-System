@@ -20,6 +20,9 @@ public class Controller {
     private static String address;
     private static String phone;
     private static ArrayList<String> accountIDs;
+    private static String currentAccountID;
+
+    private String accountType; // user selected account type during account creation
 
     // GUI components
     public TextField txtFirstName;
@@ -110,7 +113,7 @@ public class Controller {
     }
 
     // Attempts to create a new account on the server.
-    public void createCustomer() {
+    public void createCustomer() throws IOException {
         // get the values inputted into the text fields
         String firstName = txtFirstName.getText();
         String lastName = txtLastName.getText();
@@ -127,9 +130,65 @@ public class Controller {
         String response = sendCommand(cmd);
 
         // perform actions based on server's response
-
         Alert alert;
-        alert = new Alert(Alert.AlertType.CONFIRMATION, "Successfully created customer.", ButtonType.OK);
-        alert.show();
+        String[] respArgs = response.split("\\|");
+        switch (respArgs[0]) {
+            case "success":
+                // send create account request to the server
+                this.createAccount();
+                break;
+            case "fail":
+                // display failure alert with message from server
+                alert = new Alert(Alert.AlertType.ERROR, respArgs[1], ButtonType.OK);
+                alert.show();
+                break;
+        }
+    }
+
+    // Sets the user-selected account type as "savings".
+    public void setSavingsType(){
+        this.menuAccountType.setText("Savings");
+        this.accountType = "savings";
+    };
+
+    // Sets the user-selected account type as "checking".
+    public void setCheckingType(){
+        this.menuAccountType.setText("Checking");
+        this.accountType = "checking";
+    };
+
+    // Sets the user-selected account type as "credit".
+    public void setCreditType(){
+        this.menuAccountType.setText("Credit");
+        this.accountType = "credit";
+    };
+
+    public void createAccount() {
+        // get the values inputted into the text fields
+        String ssn = txtSSN.getText();
+
+        // Request: account | create | [customerSsn] | [accountType]
+        // Response: {success/fail}
+
+//        // set the new account as the current account
+//        currentAccountID = respArgs[1];
+//
+//        // get the new account's information
+//        this.getAccountInfo();
+//
+//        // load the main account scene
+//        Parent root = FXMLLoader.load(getClass().getResource(""));
+//        Stage stage = (Stage)this.btnCreateCustomer.getScene().getWindow();
+//        stage.setScene(new Scene(root, 720, 480));
+
+//        // display success alert
+//        alert = new Alert(Alert.AlertType.CONFIRMATION, "Successfully created customer.", ButtonType.OK);
+//        alert.show();
+    }
+
+    // request the current account's information from the server.
+    public void getAccountInfo() {
+        // Request: account | get | [accountId]
+        // Response: {success/fail} | [Balance] | [AccountType] | {Saving: [interestRate] | Credit Card: [CreditLimit]}
     }
 }
