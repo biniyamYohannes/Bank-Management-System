@@ -22,9 +22,9 @@ public class Controller {
     private static ArrayList<String> accountIDs;
     private static String currentAccountID;
 
-    private String accountType; // user selected account type during account creation
-
     // GUI components
+    private String accountType; // user selected account type during account creation
+    
     public TextField txtFirstName;
     public TextField txtLastName;
     public TextField txtEmail;
@@ -112,7 +112,7 @@ public class Controller {
         stage.setScene(new Scene(root, 720, 480));
     }
 
-    // Attempts to create a new account on the server.
+    // Attempts to create a new customer and account on the server.
     public void createCustomer() throws IOException {
         // get the values inputted into the text fields
         String firstName = txtFirstName.getText();
