@@ -1,18 +1,28 @@
 import socket
 
-HOST = '127.0.0.1'  # The server's hostname or IP address
-PORT = 65432        # The port used by the server
+class Client:
+    """Client class that will send messages to a server."""
+    def __init__(self, ip: str, port: int):
+        """Client constructor."""
+        self.__ip = ip
+        self.__port = port
+        self.__is_connected = False
+        self.__client_socket = None
 
-with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-    s.connect((HOST, PORT))
-    while True:
-        message = input("Write your message: ").encode('utf-8')
-        s.sendall(message)
-        data = s.recv(1024)
-        received = data.decode('utf-8')
-        if received == "exit":
-            print("Received exit command. Shutting down.")
-            break
-        print(received)        
+    def connect(self):
+        """Connect to a server."""
+        self.__client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.__client_socket.connect((self.__ip, self.__port))
+        self.__is_connected = True
 
-# print('Received', repr(data.decode('utf-8')))
+    def  send_message(self, msg: str):
+        """Send a message to the server."""
+        self.__client_socket.send(msg.encode('UTF-16'))
+
+    def receive_message(self):
+        """Receive a message from the server."""
+        return self.__client_socket.recv(1024).decode('UTF-16')
+
+    def disconnect(self):
+        self.__client_socket.close()
+        self.__is_connected = False
