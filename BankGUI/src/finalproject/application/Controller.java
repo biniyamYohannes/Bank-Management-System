@@ -101,18 +101,35 @@ public class Controller {
         }
     }
 
-    // Loads the create account scene.
-    public void loadCreateAccount() throws IOException {
+    // Loads the create customer scene.
+    public void loadCreateCustomer() throws IOException {
         // load the create account scene
-        Parent root = FXMLLoader.load(getClass().getResource("create_account.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("create_customer.fxml"));
         Stage stage = (Stage)this.btnCreateAccount.getScene().getWindow();
         stage.setScene(new Scene(root, 720, 480));
     }
 
     // Attempts to create a new account on the server.
-    public void createAccount() {
+    public void createCustomer() {
+        // get the values inputted into the text fields
+        String firstName = txtFirstName.getText();
+        String lastName = txtLastName.getText();
+        String email = txtEmail.getText();
+        String ssn = txtSSN.getText();
+        LocalDate dob = dpDOB.getValue();
+        String address = txtAddress.getText();
+        String phone = txtPhone.getText();
+        String password = txtPassword.getText();
+
+        // send create customer request to the server and receive server's response.
+        String cmd = String.format("customer|create|%s|%s|%s|%s|%s|%s|%s|%s",
+                firstName, lastName, email, ssn, dob, address, phone, password);
+        String response = sendCommand(cmd);
+
+        // perform actions based on server's response
+
         Alert alert;
-        alert = new Alert(Alert.AlertType.CONFIRMATION, "Successfully created account.", ButtonType.OK);
+        alert = new Alert(Alert.AlertType.CONFIRMATION, "Successfully created customer.", ButtonType.OK);
         alert.show();
     }
 }

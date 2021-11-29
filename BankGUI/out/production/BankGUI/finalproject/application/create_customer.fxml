@@ -65,6 +65,6 @@
             <Font name="Arial" size="24.0" />
          </font>
       </Text>
-      <Button fx:id="btnCreateAccount" layoutX="136.0" layoutY="349.0" mnemonicParsing="false" onAction="#createAccount" prefWidth="280.0" text="Create Account" />
+      <Button fx:id="btnCreateAccount" layoutX="136.0" layoutY="349.0" mnemonicParsing="false" onAction="#createCustomer" prefWidth="280.0" text="Create Account" />
    </children>
 </AnchorPane>
