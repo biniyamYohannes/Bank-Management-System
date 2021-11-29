@@ -27,20 +27,7 @@ class Transaction:
         return f'Timestamp: {self.timestamp.year}/{self.timestamp.month}/{self.timestamp.day} - {self.timestamp.hour}:{self.timestamp.minute}:{self.timestamp.second} |' \
                f' Amount: {self.amount:.2f}'
 
-    # def load(self):
-    #     """Load a transaction from the database."""
-    #     my_db = mysql.connector.connect(host=Bank.DB['hostname'], port=Bank.DB['port'], user=Bank.DB['user'], password=Bank.DB['passwd'], database=Bank.DB['db'])
-    #     cursor = my_db.cursor()
-    #     cursor.execute('SELECT trans_id, trans_account_id, trans_amount, trans_created WHERE trans_id = %s', ())
-    #
-    # @staticmethod
-    # def store():
-    #     my_db = mysql.connector.connect(host=Bank.DB['hostname'], port=Bank.DB['port'], user=Bank.DB['user'], password=Bank.DB['passwd'], database=Bank.DB['db'])
-    #     cursor = my_db.cursor()
-    #     cursor.execute('SELECT trans_id, trans_account_id, trans_amount, trans_created WHERE trans_id = %s', ())
-
-
-# ####################################################################################
+# ##########################################################################################################################################################################
 
 # Class Account
 class Account:
@@ -79,7 +66,7 @@ class Account:
         """String representation of an Account object."""
         return f'ID: {self.id} | Type: {self.type} | Balance: {self.balance} | Transactions: {len(self.transactions)}'
 
-# ####################################################################################
+# ##########################################################################################################################################################################
 
 # Class Customer
 class Customer:
@@ -105,14 +92,6 @@ class Customer:
         except:
             print('Something went wrong trying to reach the DB.')
             return ''
-
-    # def __init__(self, email: str, password: str):
-    #     """Customer constructor."""
-    #     self.__email = email
-    #     self.__fname = None
-    #     self.__lname = None
-    #     self.__accounts = []
-    #     self.load(password)
 
     def add_account(self, id: str, type: int, balance: float):
         """Add an account to the list of customer's accounts."""
@@ -164,7 +143,7 @@ class Customer:
     #     cursor.execute('SELECT trans_id, trans_account_id, trans_amount, trans_created WHERE trans_id = %s', (self.email))
 
 
-# ####################################################################################
+# ##########################################################################################################################################################################
 
 # Class Bank
 class Bank:
@@ -200,7 +179,7 @@ class Bank:
         """String representation of a Bank object."""
         return f'Name: {self.name} | Customers: {len(self.customers)}'
 
-# ####################################################################################
+# ##########################################################################################################################################################################
 
 # Test code
 if __name__ == "__main__":
@@ -210,3 +189,4 @@ if __name__ == "__main__":
     print(customer2) # Password validation failed.
     if not customer2:
         print('Customer 2 returned an empty string')
+
