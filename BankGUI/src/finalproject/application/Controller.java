@@ -63,11 +63,11 @@ public class Controller {
         String password = txtPassword.getText();
 
         // send login request to the server and receive server's response.
-        Alert alert;
         String cmd = String.format("login|%s|%s", email, password);
         String response = sendCommand(cmd);
 
         // perform actions based on server's response
+        Alert alert;
         String[] respArgs = response.split("\\|");
         switch (respArgs[0]) {
             case "success":
