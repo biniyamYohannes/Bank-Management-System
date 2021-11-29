@@ -63,11 +63,11 @@ public class Controller {
         String password = txtPassword.getText();
 
         // send login request to the server and receive server's response.
-        Alert alert;
         String cmd = String.format("login|%s|%s", email, password);
         String response = sendCommand(cmd);
 
         // perform actions based on server's response
+        Alert alert;
         String[] respArgs = response.split("\\|");
         switch (respArgs[0]) {
             case "success":
@@ -105,7 +105,7 @@ public class Controller {
     public void loadCreateAccount() throws IOException {
         // load the create account scene
         Parent root = FXMLLoader.load(getClass().getResource("create_account.fxml"));
-        Stage stage = (Stage)this.btnLogin.getScene().getWindow();
+        Stage stage = (Stage)this.btnCreateAccount.getScene().getWindow();
         stage.setScene(new Scene(root, 720, 480));
     }
 
