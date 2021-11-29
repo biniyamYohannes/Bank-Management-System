@@ -13,13 +13,13 @@ import java.util.ArrayList;
 public class Controller {
     // client data for current session
     private static Client client = new Client();
-    private String firstName;
-    private String lastName;
-    private String email;
-    private LocalDate dob;
-    private String address;
-    private String phone;
-    private ArrayList<String> accountIDs;
+    private static String firstName;
+    private static String lastName;
+    private static String email;
+    private static LocalDate dob;
+    private static String address;
+    private static String phone;
+    private static ArrayList<String> accountIDs;
 
     // GUI components
     public TextField txtFirstName;
@@ -35,6 +35,7 @@ public class Controller {
     public Button btnLogin;
 
     public Controller() {
+        // Attempts to connect the client to server on first initialization.
         if (!client.isConnected())
             client.connect();
     }
