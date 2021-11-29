@@ -9,11 +9,10 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class Controller {
     // client data for current session
-    private final Client client;
+    private static Client client = new Client();
     private String firstName;
     private String lastName;
     private String email;
@@ -36,8 +35,8 @@ public class Controller {
     public Button btnLogin;
 
     public Controller() {
-        client = new Client();
-        client.connect();
+        if (!client.isConnected())
+            client.connect();
     }
 
     // Sends a command to the server via the client, returns the server's response.
@@ -84,8 +83,8 @@ public class Controller {
 //                String[] accountIDs =  accountIDsStr.replace("[","").replace("]","").split(",");
 //                this.accountIDs = new ArrayList<>(Arrays.asList(accountIDs));
 
-                // load the menu scene
-                Parent root = FXMLLoader.load(getClass().getResource("menu.fxml"));
+                // load the account selection scene
+                Parent root = FXMLLoader.load(getClass().getResource("account_selection.fxml"));
                 Stage stage = (Stage)this.btnLogin.getScene().getWindow();
                 stage.setScene(new Scene(root, 720, 480));
 
@@ -111,6 +110,8 @@ public class Controller {
 
     // Attempts to create a new account on the server.
     public void createAccount() {
-
+        Alert alert;
+        alert = new Alert(Alert.AlertType.CONFIRMATION, "Successfully created account.", ButtonType.OK);
+        alert.show();
     }
 }

@@ -17,11 +17,11 @@ class Server:
     def send_message(self, msg: str):
         """Send message to a client."""
         self.display_message(f"""SEND>> {msg}""")
-        self.__client_socket.send(msg.encode('UTF-16'))
+        self.__client_socket.send(msg.encode('UTF-8'))
 
     def receive_message(self, max_length: int=1024):
         """Receive message from a client."""
-        msg = self.__client_socket.recv(max_length).decode('UTF-16')
+        msg = self.__client_socket.recv(max_length).decode('UTF-8')
         self.display_message(f"""RCV>> {msg}""")
         return msg
 
@@ -36,7 +36,7 @@ class Server:
             self.__client_socket, client_address = server_socket.accept()
             print(f"""Received a connection from {client_address}""")
 
-            self.send_message("Connected to Python Bank Server")
+            self.send_message("Connected to Python Bank Server\n")
 
             self.__keep_running_client = True
             while self.__keep_running_client:
@@ -56,14 +56,15 @@ class Server:
 
         try:
             if arguments[0] == 'login':
-                response = f'RECEIVED A LOGIN REQUEST AT THE SERVER (email={arguments[1]}, password={arguments[2]})'
+                response = 'success'
+                print('RECEIVED A LOGIN REQUEST AT THE SERVER')
             elif arguments[0] == 'terminate':
                 response = 'TERMINATING CONNECTION...'
                 self.__keep_running_client = False
             else:
-                response = "I couldn't understand that message."
+                response = "fail|I couldn't understand that message."
         except ValueError or IndexError as ve:
-            response = 'ERR|' + str(ve)
+            response = 'fail|' + str(ve)
             print('Something went wrong when processing the request.')
 
-        self.send_message(response)
+        self.send_message(response + '\n')
