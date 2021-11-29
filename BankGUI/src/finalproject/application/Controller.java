@@ -47,11 +47,11 @@ public class Controller {
             try {
                 response = client.sendRequest(cmd);
             } catch (IOException e) {
-                response = "ERR|" + e.getMessage();
+                response = "fail|" + e.getMessage();
             }
         }
         else {
-            response = "ERR|Client is not connected";
+            response = "fail|Client is not connected";
         }
         return response;
     }
