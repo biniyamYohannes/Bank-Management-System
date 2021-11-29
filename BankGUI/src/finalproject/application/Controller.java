@@ -71,18 +71,18 @@ public class Controller {
         String[] respArgs = response.split("\\|");
         switch (respArgs[0]) {
             case "success":
-                // save user data from the server
-                this.firstName = respArgs[1];
-                this.lastName = respArgs[2];
-                this.email = respArgs[3];
-                this.dob = LocalDate.parse(respArgs[4]);
-                this.address = respArgs[5];
-                this.phone = respArgs[6];
-
-                // parse account IDs into an ArrayList
-                String accountIDsStr = respArgs[7];
-                String[] accountIDs =  accountIDsStr.replace("[","").replace("]","").split(",");
-                this.accountIDs = new ArrayList<>(Arrays.asList(accountIDs));
+//                // save user data from the server
+//                this.firstName = respArgs[1];
+//                this.lastName = respArgs[2];
+//                this.email = respArgs[3];
+//                this.dob = LocalDate.parse(respArgs[4]);
+//                this.address = respArgs[5];
+//                this.phone = respArgs[6];
+//
+//                // parse account IDs into an ArrayList
+//                String accountIDsStr = respArgs[7];
+//                String[] accountIDs =  accountIDsStr.replace("[","").replace("]","").split(",");
+//                this.accountIDs = new ArrayList<>(Arrays.asList(accountIDs));
 
                 // load the menu scene
                 Parent root = FXMLLoader.load(getClass().getResource("menu.fxml"));
