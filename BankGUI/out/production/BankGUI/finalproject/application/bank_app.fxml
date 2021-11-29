@@ -36,7 +36,7 @@
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
               </rowConstraints>
                <children>
-                  <Button fx:id="btnCreateAccount" mnemonicParsing="false" onAction="#loadCreateCustomer" prefHeight="28.0" prefWidth="121.0" text="Create Account" GridPane.columnIndex="1" />
+                  <Button fx:id="btnCreateCustomer" mnemonicParsing="false" onAction="#loadCreateCustomer" prefHeight="28.0" prefWidth="121.0" text="Create Customer" GridPane.columnIndex="1" />
                   <Button fx:id="btnLogin" mnemonicParsing="false" onAction="#login" prefHeight="28.0" prefWidth="113.0" text="Login" />
                </children>
             </GridPane>

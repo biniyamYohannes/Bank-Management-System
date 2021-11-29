@@ -60,11 +60,11 @@
             <PasswordField fx:id="txtPassword" GridPane.columnIndex="1" GridPane.rowIndex="8" />
          </children>
       </GridPane>
-      <Text layoutX="27.0" layoutY="43.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Create Account">
+      <Text layoutX="27.0" layoutY="43.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Create Customer">
          <font>
             <Font name="Arial" size="24.0" />
          </font>
       </Text>
-      <Button fx:id="btnCreateAccount" layoutX="136.0" layoutY="349.0" mnemonicParsing="false" onAction="#createCustomer" prefWidth="280.0" text="Create Account" />
+      <Button fx:id="btnCreateCustomer" layoutX="136.0" layoutY="349.0" mnemonicParsing="false" onAction="#createCustomer" prefWidth="280.0" text="Create Customer" />
    </children>
 </AnchorPane>

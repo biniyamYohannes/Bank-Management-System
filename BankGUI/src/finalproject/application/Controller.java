@@ -31,7 +31,7 @@ public class Controller {
     public MenuButton menuAccountType;
     public TextField txtSSN;
     public PasswordField txtPassword;
-    public Button btnCreateAccount;
+    public Button btnCreateCustomer;
     public Button btnLogin;
 
     public Controller() {
@@ -105,7 +105,7 @@ public class Controller {
     public void loadCreateCustomer() throws IOException {
         // load the create account scene
         Parent root = FXMLLoader.load(getClass().getResource("create_customer.fxml"));
-        Stage stage = (Stage)this.btnCreateAccount.getScene().getWindow();
+        Stage stage = (Stage)this.btnCreateCustomer.getScene().getWindow();
         stage.setScene(new Scene(root, 720, 480));
     }
 
