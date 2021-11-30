@@ -127,7 +127,7 @@ class Customer:
         """String representation of a Customer object."""
         return f'{self.fname}|{self.lname}|{self.email}'
 
-    def get_all_accounts(self, password: str) -> list:
+    def get_all_accounts(self) -> list:
         """Load a customer from the database."""
         try:
             my_db = mysql.connector.connect(host=Bank.DB['hostname'],port=Bank.DB['port'],
@@ -136,11 +136,14 @@ class Customer:
             cursor = my_db.cursor()
             cursor.execute('SELECT acc_id '
                            'FROM account '
-                           'WHERE cust_email = %s', (self.email,))
+                           'WHERE acc_email = %s', (self.email,))
             account_ids = [row[0] for row in cursor.fetchall()]
             cursor.close()
             my_db.close()
-            return account_ids
+            string_ids = [str(acc_id) for acc_id in account_ids]
+            if not string_ids:
+                raise ValueError('Failed to retrieve account data for the provided customer.')
+            return string_ids
         except:
             print('Password validation failed.')
 
@@ -197,9 +200,5 @@ class Bank:
 
 # Test code
 if __name__ == "__main__":
-    customer1 = Customer('biniyam.yohannes@ucdenver.edu', 'password')
-    print(customer1)
-    customer2 = Customer('wrongname', 'wrongpass')
-    print(customer2)
-    if not customer2:
-        print('Customer 2 returned an empty string')
+    pass
+
