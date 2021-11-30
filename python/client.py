@@ -17,11 +17,11 @@ class Client:
 
     def  send_message(self, msg: str):
         """Send a message to the server."""
-        self.__client_socket.send(msg.encode('UTF-16'))
+        self.__client_socket.send(msg.encode('UTF-8'))
 
     def receive_message(self):
         """Receive a message from the server."""
-        return self.__client_socket.recv(1024).decode('UTF-16')
+        return self.__client_socket.recv(1024).decode('UTF-8')
 
     def disconnect(self):
         self.__client_socket.close()
