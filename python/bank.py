@@ -24,18 +24,19 @@ class Transaction:
 
     def __str__(self):
         """String representation of a Transaction object."""
-        return f'Timestamp: {self.timestamp.year}/{self.timestamp.month}/{self.timestamp.day} - {self.timestamp.hour}:{self.timestamp.minute}:{self.timestamp.second} |' \
-               f' Amount: {self.amount:.2f}'
+        return f'Timestamp: {self.timestamp.year}/{self.timestamp.month}/{self.timestamp.day} - \
+                            {self.timestamp.hour}: {self.timestamp.minute}:{self.timestamp.second} | \
+                            Amount: {self.amount:.2f}'
 
-# ##########################################################################################################################################################################
+# ##################################################################################################
 
 # Class Account
 class Account:
     """Class that will represent a customer's bank account."""
-    def __init__(self, id: str, type: int, balance: float):
+    def __init__(self, acc_id: str, acc_type: int, balance: float):
         """Account constructor."""
-        self.__id = id
-        self.__type = type
+        self.__acc_id = acc_id
+        self.__acc_type = acc_type
         self.__balance = balance
         self.__transactions = []
 
@@ -46,12 +47,12 @@ class Account:
     @property
     def id(self):
         """Get Account id."""
-        return self.__id
+        return self.__acc_id
 
     @property
     def type(self):
         """Get Account type."""
-        return self.__type
+        return self.__acc_type
 
     @property
     def balance(self):
@@ -64,9 +65,10 @@ class Account:
 
     def __str__(self):
         """String representation of an Account object."""
-        return f'ID: {self.id} | Type: {self.type} | Balance: {self.balance} | Transactions: {len(self.transactions)}'
+        return f'ID: {self.acc_id} | Type: {self.acc_type} | Balance: {self.balance} | \
+        Transactions: {len(self.transactions)}'
 
-# ##########################################################################################################################################################################
+# ##################################################################################################
 
 # Class Customer
 class Customer:
@@ -74,13 +76,17 @@ class Customer:
     def __new__(cls, email: str, password: str):
         """Create an instance of the customer class if there is a password match."""
         try:
-            my_db = mysql.connector.connect(host=Bank.DB['hostname'], port=Bank.DB['port'], user=Bank.DB['user'], password=Bank.DB['passwd'], database=Bank.DB['db'])
+            my_db = mysql.connector.connect(host=Bank.DB['hostname'], port=Bank.DB['port'],
+                                            user=Bank.DB['user'], password=Bank.DB['passwd'],
+                                            database=Bank.DB['db'])
             cursor = my_db.cursor()
-            cursor.execute('SELECT cust_fname, cust_lname, cust_pass FROM customer WHERE cust_email = %s', (email,))
+            cursor.execute('SELECT cust_fname, cust_lname, cust_pass '
+                           'FROM customer '
+                           'WHERE cust_email = %s', (email,))
             for row in cursor.fetchall():
                 if row[2] != password:
-                    print('Password validation failed.')
-                    return ''
+                    print('Customer:__new__: Password validation failed.')
+                    return None
                 else:
                     # create a new instance and set attributes on it
                     instance = super().__new__(cls)  # empty instance
@@ -90,8 +96,8 @@ class Customer:
                     instance.__accounts = []
                     return instance
         except:
-            print('Something went wrong trying to reach the DB.')
-            return ''
+            print('Customer:__new__: Something went wrong trying to reach the DB.')
+            return None
 
     def add_account(self, id: str, type: int, balance: float):
         """Add an account to the list of customer's accounts."""
@@ -119,31 +125,35 @@ class Customer:
 
     def __str__(self):
         """String representation of a Customer object."""
-        return f'Name: {self.fname} {self.lname} | Email {self.email} | Accounts: {len(self.accounts)}'
+        return f'{self.fname}|{self.lname}|{self.email}'
 
-    def load(self, password: str):
-        """Load a transaction from the database."""
+    def get_all_accounts(self, password: str) -> list:
+        """Load a customer from the database."""
         try:
-            my_db = mysql.connector.connect(host=Bank.DB['hostname'], port=Bank.DB['port'], user=Bank.DB['user'], password=Bank.DB['passwd'], database=Bank.DB['db'])
+            my_db = mysql.connector.connect(host=Bank.DB['hostname'],port=Bank.DB['port'],
+                                            user=Bank.DB['user'],password=Bank.DB['passwd'],
+                                            database=Bank.DB['db'])
             cursor = my_db.cursor()
-            cursor.execute('SELECT cust_fname, cust_lname, cust_pass FROM customer WHERE cust_email = %s', (self.email,))
-            for row in cursor.fetchall():
-                if row[2] == password:
-                    self.__fname = row[0]
-                    self.__lname = row[1]
+            cursor.execute('SELECT acc_id '
+                           'FROM account '
+                           'WHERE cust_email = %s', (self.email,))
+            account_ids = [row[0] for row in cursor.fetchall()]
             cursor.close()
             my_db.close()
+            return account_ids
         except:
             print('Password validation failed.')
 
     # @staticmethod
     # def store():
-    #     my_db = mysql.connector.connect(host=Bank.DB['hostname'], port=Bank.DB['port'], user=Bank.DB['user'], password=Bank.DB['passwd'], database=Bank.DB['db'])
+    #     my_db = mysql.connector.connect(host=Bank.DB['hostname'], port=Bank.DB['port'],
+    #     user=Bank.DB['user'], password=Bank.DB['passwd'], database=Bank.DB['db'])
     #     cursor = my_db.cursor()
-    #     cursor.execute('SELECT trans_id, trans_account_id, trans_amount, trans_created WHERE trans_id = %s', (self.email))
+    #     cursor.execute('SELECT trans_id, trans_account_id, trans_amount, trans_created
+    #     FROM transaction
+    #     WHERE trans_id = %s', (self.email))
 
-
-# ##########################################################################################################################################################################
+# ##################################################################################################
 
 # Class Bank
 class Bank:
@@ -171,6 +181,10 @@ class Bank:
         """Get the customer currently using the bank."""
         return self.__current_customer
 
+    @current_customer.setter
+    def current_customer(self, customer: Customer):
+        self.__current_customer = customer
+
     def addCustomer(self, fname: str, lname: str, email: str):
         """Add a customer to the bank's database."""
         self.customers.append(Customer(fname, lname, email))
@@ -179,14 +193,13 @@ class Bank:
         """String representation of a Bank object."""
         return f'Name: {self.name} | Customers: {len(self.customers)}'
 
-# ##########################################################################################################################################################################
+# ##################################################################################################
 
 # Test code
 if __name__ == "__main__":
     customer1 = Customer('biniyam.yohannes@ucdenver.edu', 'password')
-    print(customer1) # Name: Biniyam Yohannes | Email biniyam.yohannes@ucdenver.edu | Accounts: 0
-    customer2 = Customer('biniyam.yohannes@ucdenver.edu', 'invalid_password')
-    print(customer2) # Password validation failed.
+    print(customer1)
+    customer2 = Customer('wrongname', 'wrongpass')
+    print(customer2)
     if not customer2:
         print('Customer 2 returned an empty string')
-
