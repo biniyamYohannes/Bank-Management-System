@@ -17,10 +17,10 @@ public class Controller {
     private static Client client = new Client();
     private static String ssn;
     private static String currentAccountID;
-    private static ArrayList<Account> accounts;
+    private static ArrayList<Account> accounts = new ArrayList<>();
 
     // GUI components
-    private String selectedAccountType; // user selected account type during account creation
+    private String selectedAccountType;
     public TextField txtFirstName;
     public TextField txtLastName;
     public TextField txtEmail;
@@ -70,7 +70,7 @@ public class Controller {
         String[] respArgs = response.split("\\|");
         switch (respArgs[0]) {
             case "success":
-                // save the user's SSN from the server.
+                // save the user's SSN from the server
                 ssn = respArgs[1];
 
                 // load the user's accounts
@@ -170,7 +170,7 @@ public class Controller {
         String[] accountIDs = this.getAccountIDs();
 
         // clear the user's list of accounts
-        accounts = new ArrayList<>();
+        accounts.clear();
 
         // fetch and store information for each account
         for (String accountID : accountIDs) {
@@ -249,7 +249,7 @@ public class Controller {
         // get the value inputted into the data field
         String accountType = this.selectedAccountType;
 
-        // send create customer request to the server and receive server's response.
+        // send create customer request to the server and receive server's response
         String cmd = String.format("account|create|%s|%s", ssn, accountType);
         String response = sendCommand(cmd);
 
@@ -288,7 +288,7 @@ public class Controller {
                 stage.setScene(new Scene(root, 720, 480));
 
                 // display success alert
-                alert = new Alert(Alert.AlertType.CONFIRMATION, "Successfully created account.", ButtonType.OK);
+                alert = new Alert(Alert.AlertType.CONFIRMATION, "Account successfully created.", ButtonType.OK);
                 alert.show();
                 break;
             case "fail":
