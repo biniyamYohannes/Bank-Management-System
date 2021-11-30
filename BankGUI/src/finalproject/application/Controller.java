@@ -19,7 +19,8 @@ import java.util.Objects;
 public class Controller {
     // client and account data for current session
     private static final Client client = new Client();
-    private static String ssn;
+    // private static String ssn;
+    private static String email;
     private static Account currentAccount;
     private static ArrayList<Account> accounts = new ArrayList<>();
 
@@ -125,6 +126,9 @@ public class Controller {
 
     // Attempts to log into an account on the server with the provided credentials.
     public void login(ActionEvent actionEvent) throws IOException {
+//        Request: login | email | password
+//        Response: {success/fail} | fname | lname | email
+
         // get the values inputted into the text fields
         String email = txtEmail.getText();
         String password = txtPassword.getText();
@@ -138,8 +142,11 @@ public class Controller {
         String[] respArgs = response.split("\\|");
         switch (respArgs[0]) {
             case "success":
-                // save the user's SSN from the server
-                Controller.ssn = respArgs[1];
+//                // save the user's SSN from the server
+//                Controller.ssn = respArgs[1];
+
+                // save the user's email as the current email
+                Controller.email = email;
 
                 // load the user's accounts
                 this.getAccounts();
@@ -273,8 +280,11 @@ public class Controller {
         String[] respArgs = response.split("\\|");
         switch (respArgs[0]) {
             case "success":
-                // set the SSN as the current user's SSN
-                Controller.ssn = ssn;
+//                // set the SSN as the current user's SSN
+//                Controller.ssn = ssn;
+
+                // set the email as the current user's email
+                Controller.email = email;
 
                 // send create account request to the server
                 this.createAccount(actionEvent);
@@ -307,11 +317,11 @@ public class Controller {
 
     // Attempts to create a new account on the server.
     public void createAccount(ActionEvent actionEvent) throws IOException {
-//        Request: account | create | [customerSsn] | [accountType]
+//        Request: account | create | [email] | [accountType]
 //        Response: {success/fail} | {accountID/errorMsg}
 
         // send create customer request to the server and receive server's response
-        String cmd = String.format("account|create|%s|%s", Controller.ssn, this.selectedAccountType);
+        String cmd = String.format("account|create|%s|%s", Controller.email, this.selectedAccountType);
         String response = sendCommand(cmd);
 
         // perform actions based on server's response
