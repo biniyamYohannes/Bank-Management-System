@@ -1,14 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
 
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="finalproject.application.Controller"
-            prefHeight="400.0" prefWidth="600.0">
 
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="finalproject.application.Controller">
+   <children>
+      <Label layoutX="25.0" layoutY="27.0" text="Select an account">
+         <font>
+            <Font name="Arial" size="24.0" />
+         </font>
+      </Label>
+      <ListView fx:id="listAccounts" layoutX="31.0" layoutY="69.0" onMouseClicked="#selectAccount" prefHeight="263.0" prefWidth="539.0" />
+      <Button fx:id="btnAddAccount" layoutX="300.0" layoutY="354.0" mnemonicParsing="false" onAction="#loadAddAccount" text="Add New Account" />
+      <Button fx:id="btnSelectAccount" layoutX="176.0" layoutY="354.0" mnemonicParsing="false" onAction="#loadAccountMain" prefHeight="26.0" prefWidth="103.0" text="Next" />
+   </children>
 </AnchorPane>

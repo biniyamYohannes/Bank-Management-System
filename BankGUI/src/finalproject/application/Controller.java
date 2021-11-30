@@ -1,9 +1,13 @@
 package finalproject.application;
 import finalproject.client.Client;
+import javafx.collections.FXCollections;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -14,9 +18,9 @@ import java.util.Objects;
 
 public class Controller {
     // client and account data for current session
-    private static Client client = new Client();
+    private static final Client client = new Client();
     private static String ssn;
-    private static String currentAccountID;
+    private static Account currentAccount;
     private static ArrayList<Account> accounts = new ArrayList<>();
 
     // GUI components
@@ -30,21 +34,85 @@ public class Controller {
     public MenuButton menuAccountType;
     public TextField txtSSN;
     public PasswordField txtPassword;
+    public ListView<Account> listAccounts;
     public Button btnCreateAccount;
     public Button btnLogin;
+    public Button btnAddAccount;
+    public Button btnSelectAccount;
 
     public Controller() {
-        // Attempts to connect the client to server on first initialization.
-        if (!client.isConnected())
-            client.connect();
+        // attempts to connect the client to server on first initialization
+        if (!Controller.client.isConnected())
+            Controller.client.connect();
+
+        // initialize the view model for the list of accounts
+        this.listAccounts = new ListView<>();
+        this.listAccounts.setItems(FXCollections.observableArrayList(Controller.accounts));
+    }
+
+    // Gets the stage associated with a button click.
+    private Stage getStage(ActionEvent actionEvent) {
+        Node button = (Node) actionEvent.getSource();
+        Stage stage = (Stage)button.getScene().getWindow();
+        return stage;
+    }
+
+    // Loads a scene from an FXML file.
+    private void loadScene(Stage stage, String fxml) throws IOException {
+        Parent root = FXMLLoader.load(getClass().getResource(fxml));
+        stage.setScene(new Scene(root, 720, 480));
+    }
+
+    // Loads the create customer scene.
+    public void loadCreateCustomer(ActionEvent actionEvent) throws IOException {
+        Stage stage = getStage(actionEvent);
+        this.loadScene(stage, "create_customer.fxml");
+    }
+
+    // Loads the account selection scene.
+    public void loadAccountSelection(ActionEvent actionEvent) throws IOException {
+        Stage stage = getStage(actionEvent);
+        this.loadScene(stage, "account_selection.fxml");
+    }
+
+    // Handles the event that the user clicks on an account in the account list by setting it as the current account
+    public void selectAccount(MouseEvent mouseEvent) {
+        Controller.currentAccount = this.listAccounts.getSelectionModel().getSelectedItem();
+    }
+
+    // Loads the add account scene.
+    public void loadAddAccount(ActionEvent actionEvent) throws IOException {
+        Stage stage = getStage(actionEvent);
+        this.loadScene(stage, "add_account.fxml");
+    }
+
+    // Loads the main account scene.
+    public void loadAccountMain(ActionEvent actionEvent) throws IOException {
+        Stage stage = getStage(actionEvent);
+
+        // load the main account scene based on the current account's type
+        String fxml = "";
+        switch (Controller.currentAccount.getType()) {
+            case "savings":
+                fxml = "savings_main.fxml";
+                break;
+            case "checking":
+                fxml = "checking_main.fxml";
+                break;
+            case "credit":
+                fxml = "credit_main.fxml";
+                break;
+        }
+
+        this.loadScene(stage, fxml);
     }
 
     // Sends a command to the server via the client, returns the server's response.
     private String sendCommand(String cmd) {
         String response;
-        if (client.isConnected()) {
+        if (Controller.client.isConnected()) {
             try {
-                response = client.sendRequest(cmd);
+                response = Controller.client.sendRequest(cmd);
             } catch (IOException e) {
                 response = "fail|" + e.getMessage();
             }
@@ -56,7 +124,7 @@ public class Controller {
     }
 
     // Attempts to log into an account on the server with the provided credentials.
-    public void login() throws IOException {
+    public void login(ActionEvent actionEvent) throws IOException {
         // get the values inputted into the text fields
         String email = txtEmail.getText();
         String password = txtPassword.getText();
@@ -71,15 +139,13 @@ public class Controller {
         switch (respArgs[0]) {
             case "success":
                 // save the user's SSN from the server
-                ssn = respArgs[1];
+                Controller.ssn = respArgs[1];
 
                 // load the user's accounts
                 this.getAccounts();
 
                 // load the account selection scene
-                Parent root = FXMLLoader.load(getClass().getResource("account_selection.fxml"));
-                Stage stage = (Stage)this.btnLogin.getScene().getWindow();
-                stage.setScene(new Scene(root, 720, 480));
+                this.loadAccountSelection(actionEvent);
 
                 // display success alert
                 alert = new Alert(Alert.AlertType.CONFIRMATION, "Login successful.", ButtonType.OK);
@@ -94,14 +160,14 @@ public class Controller {
     }
 
     // Fetches and returns the user's account IDs from the server.
-    public String[] getAccountIDs() {
-//        Request: customer | get | accountIDs
+    private String[] getAccountIDs() {
+//        Request: customer | get | all
 //        Response: {success/fail} | accountID1 | accountID2| accountID3 | ...
 
         String[] accountIDs;
 
         // send account IDs request to the server and receive server's response.
-        String cmd = "customer|get|accountIDs";
+        String cmd = "customer|get|all";
         String response = sendCommand(cmd);
 
         // perform actions based on server's response
@@ -128,7 +194,7 @@ public class Controller {
     }
 
     // Request an account's information from the server, returns an Account object containing the account info.
-    public Account getAccount(String accountID) {
+    private Account getAccount(String accountID) {
         // Request: account | get | [accountId]
         // Response: {success/fail} | [Balance] | [AccountType] | {Saving: [interestRate] | Credit Card: [CreditLimit]}
 
@@ -148,11 +214,11 @@ public class Controller {
 
                 // create account depending on type
                 if (Objects.equals(accountType, "savings"))
-                    account = new SavingsAccount(accountType, balance, Float.parseFloat(respArgs[3]));
+                    account = new SavingsAccount(accountID, accountType, balance, Float.parseFloat(respArgs[3]));
                 else if (Objects.equals(accountType, "credit"))
-                    account = new CreditAccount(accountType, balance, Float.parseFloat(respArgs[3]));
+                    account = new CreditAccount(accountID, accountType, balance, Float.parseFloat(respArgs[3]));
                 else
-                    account = new Account(accountType, balance);
+                    account = new Account(accountID, accountType, balance);
                 break;
             case "fail":
                 // display failure alert with message from server
@@ -165,7 +231,7 @@ public class Controller {
     }
 
     // Fetches and stores the current user's accounts from the server.
-    public void getAccounts() {
+    private void getAccounts() {
         // get the user's account IDs
         String[] accountIDs = this.getAccountIDs();
 
@@ -177,18 +243,13 @@ public class Controller {
             Account account = this.getAccount(accountID);
             accounts.add(account);
         }
-    }
 
-    // Loads the create customer scene.
-    public void loadCreateCustomer() throws IOException {
-        // load the create account scene
-        Parent root = FXMLLoader.load(getClass().getResource("create_customer.fxml"));
-        Stage stage = (Stage)this.btnCreateAccount.getScene().getWindow();
-        stage.setScene(new Scene(root, 720, 480));
+        // update the view model for the list of accounts
+        this.listAccounts.setItems(FXCollections.observableArrayList(Controller.accounts));
     }
     
     // Attempts to create a new customer and account on the server.
-    public void createCustomer() throws IOException {
+    public void createCustomer(ActionEvent actionEvent) throws IOException {
 //        Request: customer | create | [fname] | [lname] | [email] | [ssn] | [dob] | [address] | [phone] | password
 //        Response: {success/fail} | errorMsg
 
@@ -196,7 +257,7 @@ public class Controller {
         String firstName = txtFirstName.getText();
         String lastName = txtLastName.getText();
         String email = txtEmail.getText();
-        ssn = txtSSN.getText();
+        String ssn = txtSSN.getText();
         LocalDate dob = dpDOB.getValue();
         String address = txtAddress.getText();
         String phone = txtPhone.getText();
@@ -212,8 +273,11 @@ public class Controller {
         String[] respArgs = response.split("\\|");
         switch (respArgs[0]) {
             case "success":
+                // set the SSN as the current user's SSN
+                Controller.ssn = ssn;
+
                 // send create account request to the server
-                this.createAccount();
+                this.createAccount(actionEvent);
                 break;
             case "fail":
                 // display failure alert with message from server
@@ -242,15 +306,12 @@ public class Controller {
     };
 
     // Attempts to create a new account on the server.
-    public void createAccount() throws IOException {
+    public void createAccount(ActionEvent actionEvent) throws IOException {
 //        Request: account | create | [customerSsn] | [accountType]
 //        Response: {success/fail} | {accountID/errorMsg}
 
-        // get the value inputted into the data field
-        String accountType = this.selectedAccountType;
-
         // send create customer request to the server and receive server's response
-        String cmd = String.format("account|create|%s|%s", ssn, accountType);
+        String cmd = String.format("account|create|%s|%s", Controller.ssn, this.selectedAccountType);
         String response = sendCommand(cmd);
 
         // perform actions based on server's response
@@ -261,31 +322,20 @@ public class Controller {
                 // get the new account's ID
                 String accountID = respArgs[1];
 
-                // set the account ID as the current account ID
-                currentAccountID = accountID;
-
                 // get the new account's information
                 Account newAccount = this.getAccount(accountID);
 
+                // set the new account as the current account
+                Controller.currentAccount = newAccount;
+
                 // add the new account to the user's list of accounts
-                accounts.add(newAccount);
+                Controller.accounts.add(newAccount);
+
+                // update the view model for the list of accounts
+                this.listAccounts.setItems(FXCollections.observableArrayList(Controller.accounts));
 
                 // load the main account scene based on account type
-                String fxml = "";
-                switch (newAccount.getType()) {
-                    case "savings":
-                        fxml = "savings_main.fxml";
-                        break;
-                    case "checking":
-                        fxml = "checking_main.fxml";
-                        break;
-                    case "credit":
-                        fxml = "credit_main.fxml";
-                        break;
-                }
-                Parent root = FXMLLoader.load(getClass().getResource(fxml));
-                Stage stage = (Stage)this.btnCreateAccount.getScene().getWindow();
-                stage.setScene(new Scene(root, 720, 480));
+                this.loadAccountMain(actionEvent);
 
                 // display success alert
                 alert = new Alert(Alert.AlertType.CONFIRMATION, "Account successfully created.", ButtonType.OK);
