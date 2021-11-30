@@ -145,7 +145,7 @@ class Customer:
                 raise ValueError('Failed to retrieve account data for the provided customer.')
             return string_ids
         except:
-            print('Password validation failed.')
+            print('Something went wrong when retrieving account ids from the database.')
 
     # @staticmethod
     # def store():
