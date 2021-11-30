@@ -20,6 +20,8 @@ public class Controller {
     // client and account data for current session
     private static final Client client = new Client();
     // private static String ssn;
+    private static String firstName;
+    private static String lastName;
     private static String email;
     private static Account currentAccount;
     private static ArrayList<Account> accounts = new ArrayList<>();
@@ -145,8 +147,10 @@ public class Controller {
 //                // save the user's SSN from the server
 //                Controller.ssn = respArgs[1];
 
-                // save the user's email as the current email
-                Controller.email = email;
+                // set the current user's info
+                Controller.firstName = respArgs[1];
+                Controller.lastName = respArgs[2];
+                Controller.email = respArgs[3];
 
                 // load the user's accounts
                 this.getAccounts();
@@ -283,7 +287,9 @@ public class Controller {
 //                // set the SSN as the current user's SSN
 //                Controller.ssn = ssn;
 
-                // set the email as the current user's email
+                // set the current user's info
+                Controller.firstName = firstName;
+                Controller.lastName = lastName;
                 Controller.email = email;
 
                 // send create account request to the server
