@@ -1,9 +1,11 @@
 import socket
+import bank as b
 
 class Server:
     """Server class that handles client requests."""
-    def __init__(self, ip: str, port: int, backlog: int):
+    def __init__(self, bank: str, ip: str, port: int, backlog: int):
         """Server constructor."""
+        self.__bank = b.Bank(bank)
         self.__ip = ip
         self.__port = port
         self.__backlog = backlog
@@ -11,8 +13,12 @@ class Server:
         self.__keep_running = True
         self.__keep_running_client = False
 
+    @property
+    def bank(self):
+        return self.__bank
+
     def display_message(self, message: str):
-        print(f'CLIENT >> {message}')
+        print(f'[SRV] >> {message}')
 
     def send_message(self, msg: str):
         """Send message to a client."""
@@ -48,21 +54,47 @@ class Server:
 
     def process_client_request(self):
         """Process message received from the client."""
-        client_message = self.receive_message()
-        self.display_message(f'CLIENT SAID>>>{client_message}')
 
+        def check_arguments(arguments: list, num_arguments, *args):
+            """Check whether the number of arguments and argument format matches given argument list."""
+            for i, arg in enumerate(args):
+                if arguments[i] != arg:
+                    return False
+            if len(arguments) != num_arguments:
+                raise ValueError("Number of arguments does not match the requested service.")
+            return True
+
+        client_message = self.receive_message()
+        # self.display_message(f'CLIENT SAID>>>{client_message}')
         arguments = client_message.split('|')
         response = ''
 
         try:
-            if arguments[0] == 'login':
-                response = 'success'
+            if check_arguments(arguments, 3, 'login'):
                 print('RECEIVED A LOGIN REQUEST AT THE SERVER')
+                if self.bank.current_customer == None:
+                    customer = b.Customer(arguments[1], arguments[2])
+                    if customer == None:
+                        raise ValueError('fail|Failed to retrieve customer data for the provided email and password.')
+                    else:
+                        self.bank.current_customer = customer
+                        response = f'success|{str(customer)}'# + f' (The current_customer is set to ' \
+                                                             #   f'{self.bank.current_customer.fname} ' \
+                                                             #   f'{self.bank.current_customer.lname})'
+                else:
+                    response = 'fail|A customer is already logged into the current session.' \
+                               ' Please log out first.'
+
+            elif check_arguments(arguments, 3, 'customer', 'get', 'all'):
+                response = 'The client has requested all accounts for the current customer.'
+
+
             elif arguments[0] == 'terminate':
                 response = 'TERMINATING CONNECTION...'
                 self.__keep_running_client = False
             else:
                 response = "fail|I couldn't understand that message."
+
         except ValueError or IndexError as ve:
             response = 'fail|' + str(ve)
             print('Something went wrong when processing the request.')
