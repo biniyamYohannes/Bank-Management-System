@@ -85,7 +85,7 @@ class Customer:
                            'WHERE cust_email = %s', (email,))
             for row in cursor.fetchall():
                 if row[2] != password:
-                    print('Customer:__new__: Password validation failed.')
+                    print('Password validation failed.')
                     return None
                 else:
                     # create a new instance and set attributes on it
@@ -99,9 +99,43 @@ class Customer:
             print('Customer:__new__: Something went wrong trying to reach the DB.')
             return None
 
+    def load_all_accounts(self) -> list:
+        """Load all customers from the database."""
+        try:
+            my_db = mysql.connector.connect(host=Bank.DB['hostname'],port=Bank.DB['port'],
+                                            user=Bank.DB['user'],password=Bank.DB['passwd'],
+                                            database=Bank.DB['db'])
+            cursor = my_db.cursor()
+            cursor.execute('SELECT acc_id, acc_type, acc_balance '
+                           'FROM account '
+                           'WHERE acc_email = %s', (self.email,))
+
+            account_ids = []
+            self.init_accounts()
+
+            for row in cursor.fetchall():
+                self.add_account(row[0], row[1], row[2])    # populate the accounts list with Account objects
+                account_ids.append(str(row[0]))             # account ids for current customer will be returned
+
+            string_ids = [str(acc_id) for acc_id in account_ids]
+            cursor.close()
+            my_db.close()
+            if not string_ids:
+                raise ValueError('Failed to retrieve account data for the provided customer.')
+            return string_ids
+        except:
+            print('Something went wrong when retrieving account ids from the database.')
+
     def add_account(self, id: str, type: int, balance: float):
         """Add an account to the list of customer's accounts."""
         self.accounts.append(Account(id, type, balance))
+
+    def find_account(self, id: str):
+        # Find account in the current account list by id, if not found return None
+        for account in self.accounts:
+            if account.id == id:
+                return account
+        return None
 
     @property
     def fname(self):
@@ -123,38 +157,16 @@ class Customer:
         """Get list of customer's accounts."""
         return self.__accounts
 
+    @accounts.setter
+    def accounts(self, account_list):
+        self.__accounts = account_list
+
+    def init_accounts(self):
+        self.accounts = []
+
     def __str__(self):
         """String representation of a Customer object."""
         return f'{self.fname}|{self.lname}|{self.email}'
-
-    def get_all_accounts(self) -> list:
-        """Load a customer from the database."""
-        try:
-            my_db = mysql.connector.connect(host=Bank.DB['hostname'],port=Bank.DB['port'],
-                                            user=Bank.DB['user'],password=Bank.DB['passwd'],
-                                            database=Bank.DB['db'])
-            cursor = my_db.cursor()
-            cursor.execute('SELECT acc_id '
-                           'FROM account '
-                           'WHERE acc_email = %s', (self.email,))
-            account_ids = [row[0] for row in cursor.fetchall()]
-            cursor.close()
-            my_db.close()
-            string_ids = [str(acc_id) for acc_id in account_ids]
-            if not string_ids:
-                raise ValueError('Failed to retrieve account data for the provided customer.')
-            return string_ids
-        except:
-            print('Something went wrong when retrieving account ids from the database.')
-
-    # @staticmethod
-    # def store():
-    #     my_db = mysql.connector.connect(host=Bank.DB['hostname'], port=Bank.DB['port'],
-    #     user=Bank.DB['user'], password=Bank.DB['passwd'], database=Bank.DB['db'])
-    #     cursor = my_db.cursor()
-    #     cursor.execute('SELECT trans_id, trans_account_id, trans_amount, trans_created
-    #     FROM transaction
-    #     WHERE trans_id = %s', (self.email))
 
 # ##################################################################################################
 
@@ -188,9 +200,20 @@ class Bank:
     def current_customer(self, customer: Customer):
         self.__current_customer = customer
 
-    def addCustomer(self, fname: str, lname: str, email: str):
-        """Add a customer to the bank's database."""
-        self.customers.append(Customer(fname, lname, email))
+    def create_customer(self, email: str, password:str):
+        """Create a new Customer object by retrieving their data from the db."""
+        return Customer(email, password)
+
+    def login(self, email: str, password: str):
+        """Log in a user based on credentials."""
+        if self.current_customer:
+            raise ValueError('Another customer is already logged into the session.')
+        else:
+            self.current_customer = self.create_customer(email, password)
+        if not self.current_customer:
+            raise ValueError('Login failed. Failed to retrieve customer data for the provided email and password.')
+        else:
+            return f'success|{str(self.current_customer)}'
 
     def __str__(self):
         """String representation of a Bank object."""
