@@ -1,4 +1,4 @@
-package finalproject.application;
+package finalproject.application.models;
 
 public class CreditAccount extends Account {
     private final float limit;

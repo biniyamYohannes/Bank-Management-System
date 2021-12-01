@@ -1,4 +1,4 @@
-package finalproject.application;
+package finalproject.application.models;
 
 public class Account {
     private final String id;

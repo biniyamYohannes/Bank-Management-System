@@ -1,5 +1,8 @@
 package finalproject.application;
 
+import finalproject.application.models.Account;
+import finalproject.application.models.CreditAccount;
+import finalproject.application.models.SavingsAccount;
 import finalproject.client.Client;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -65,7 +68,7 @@ public class Controller {
 
     // Loads a scene from an FXML file.
     private void loadScene(Stage stage, String fxml) throws IOException {
-        Parent root = FXMLLoader.load(getClass().getResource(fxml));
+        Parent root = FXMLLoader.load(getClass().getResource("views/" + fxml));
         stage.setScene(new Scene(root, 720, 480));
     }
 
