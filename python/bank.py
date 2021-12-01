@@ -110,21 +110,21 @@ class Customer:
                            'FROM account '
                            'WHERE acc_email = %s', (self.email,))
 
-            account_ids = []
             self.init_accounts()
-
             for row in cursor.fetchall():
                 self.add_account(row[0], row[1], row[2])    # populate the accounts list with Account objects
-                account_ids.append(str(row[0]))             # account ids for current customer will be returned
 
-            string_ids = [str(acc_id) for acc_id in account_ids]
             cursor.close()
             my_db.close()
-            if not string_ids:
-                raise ValueError('Failed to retrieve account data for the provided customer.')
-            return string_ids
+            if not self.accounts:
+                raise ValueError('Failed to retrieve account data for the requested customer.')
         except:
             print('Something went wrong when retrieving account ids from the database.')
+
+    def get_account_ids(self):
+        """Reload all accounts and return their account ids as strings."""
+        self.load_all_accounts()
+        return [str(account.id) for account in self.accounts]
 
     def add_account(self, id: str, type: int, balance: float):
         """Add an account to the list of customer's accounts."""
