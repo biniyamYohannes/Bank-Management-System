@@ -53,11 +53,10 @@ public class Controller {
         this.listAccounts.setItems(FXCollections.observableArrayList(Controller.accounts));
     }
 
-    // Gets the stage associated with a button click.
+    // Gets the stage associated with an ActionEvent.
     private Stage getStage(ActionEvent actionEvent) {
         Node button = (Node) actionEvent.getSource();
-        Stage stage = (Stage)button.getScene().getWindow();
-        return stage;
+        return (Stage)button.getScene().getWindow();
     }
 
     // Loads a scene from an FXML file.
