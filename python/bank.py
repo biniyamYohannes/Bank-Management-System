@@ -33,12 +33,37 @@ class Transaction:
 # Class Account
 class Account:
     """Class that will represent a customer's bank account."""
-    def __init__(self, acc_id: str, acc_type: int, balance: float):
-        """Account constructor."""
-        self.__acc_id = acc_id
-        self.__acc_type = acc_type
-        self.__balance = balance
-        self.__transactions = []
+    # def __init__(self, acc_id: str, acc_type: int, balance: float):
+    #     """Account constructor."""
+    #     self.__acc_id = acc_id
+    #     self.__acc_type = acc_type
+    #     self.__balance = balance
+    #     self.__transactions = []
+
+    def __new__(cls, acc_id: str):
+        """Create an instance of the customer class if there is a password match."""
+        try:
+            my_db = mysql.connector.connect(host=Bank.DB['hostname'], port=Bank.DB['port'],
+                                            user=Bank.DB['user'], password=Bank.DB['passwd'],
+                                            database=Bank.DB['db'])
+            cursor = my_db.cursor()
+            cursor.execute('SELECT acc_id, acc_balance, acc_type, acc_rate, acc_limit, acc_email '
+                           'FROM account '
+                           'WHERE acc_id = %s', (acc_id,))
+            for row in cursor.fetchall():
+                # Create a new instance and set attributes on it
+                instance = super().__new__(cls)  # empty instance
+                instance.__acc_id = row[0]
+                instance.__balance = row[1]
+                instance.__acc_type = row[2]
+                instance.__acc_rate = row[3]
+                instance.__acc_limit = row[4]
+                instance.__acc_email = row[5]
+                instance.__transactions = []
+                return instance
+        except:
+            print('Account:__new__: Something went wrong trying to reach the DB.')
+            return None
 
     def add_transaction(self, timestamp: datetime.datetime, amount: float):
         """Add a transaction to the account's list of transactions."""
@@ -60,19 +85,24 @@ class Account:
         return self.__balance
 
     @property
+    def rate(self):
+        """Get Account balance."""
+        return self.__acc_rate
+
+    @property
     def transactions(self):
         return self.__transactions
 
     def __str__(self):
         """String representation of an Account object."""
-        return f'ID: {self.acc_id} | Type: {self.acc_type} | Balance: {self.balance} | \
-        Transactions: {len(self.transactions)}'
+        return f'{self.balance}|{self.type}|{self.rate}'
 
 # ##################################################################################################
 
 # Class Customer
 class Customer:
     """Class that will represent a bank's customer."""
+
     def __new__(cls, email: str, password: str):
         """Create an instance of the customer class if there is a password match."""
         try:
@@ -99,8 +129,9 @@ class Customer:
             print('Customer:__new__: Something went wrong trying to reach the DB.')
             return None
 
-    def load_all_accounts(self) -> list:
-        """Load all customers from the database."""
+    def load_all_accounts(self):
+        """Load all accounts from the database."""
+        self.init_accounts()
         try:
             my_db = mysql.connector.connect(host=Bank.DB['hostname'],port=Bank.DB['port'],
                                             user=Bank.DB['user'],password=Bank.DB['passwd'],
@@ -110,9 +141,8 @@ class Customer:
                            'FROM account '
                            'WHERE acc_email = %s', (self.email,))
 
-            self.init_accounts()
             for row in cursor.fetchall():
-                self.add_account(row[0], row[1], row[2])    # populate the accounts list with Account objects
+                self.add_account(row[0])    # populate the accounts list with Account objects
 
             cursor.close()
             my_db.close()
@@ -121,19 +151,24 @@ class Customer:
         except:
             print('Something went wrong when retrieving account ids from the database.')
 
-    def get_account_ids(self):
+    def add_account(self, id: int):
+        """Add an account to the list of customer's accounts."""
+        self.accounts.append(Account(id))
+
+    def get_account_ids(self) -> list:
         """Reload all accounts and return their account ids as strings."""
         self.load_all_accounts()
         return [str(account.id) for account in self.accounts]
 
-    def add_account(self, id: str, type: int, balance: float):
-        """Add an account to the list of customer's accounts."""
-        self.accounts.append(Account(id, type, balance))
+    def get_account(self, id: str):
+        """Find and return an account based on account id."""
+        self.load_all_accounts()
+        return self.find_account(id)
 
     def find_account(self, id: str):
         # Find account in the current account list by id, if not found return None
         for account in self.accounts:
-            if account.id == id:
+            if str(account.id) == id:
                 return account
         return None
 
@@ -223,5 +258,6 @@ class Bank:
 
 # Test code
 if __name__ == "__main__":
-    pass
+    customer = Customer('biniyam.yohannes@ucdenver.edu', 'password')
+    customer.load_all_accounts()
 
