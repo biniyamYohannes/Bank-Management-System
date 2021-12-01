@@ -87,8 +87,14 @@ class Server:
 
             # Get a specific account
             elif check_arguments(arguments, 3, 'account', 'get'):
+                if self.bank.current_customer == None:
+                    raise ValueError('No customer is currently logged in.')
                 print('RECEIVED A GET REQUEST FROM CLIENT TO RETRIEVE A SPECIFIC ACCOUNT.')
-                account = self.bank.current_customer.load_account()
+                account = self.bank.current_customer.get_account(arguments[2])
+                if account:
+                   response = f'success|{str(account)}'
+                else:
+                    raise ValueError(f'Account with id {arguments[2]} not found.')
 
 
             elif arguments[0] == 'terminate':
