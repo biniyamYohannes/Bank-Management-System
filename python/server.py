@@ -55,7 +55,7 @@ class Server:
     def process_client_request(self):
         """Process message received from the client."""
 
-        def check_arguments(arguments: list, num_arguments, *args):
+        def check_arguments(arguments: list, num_arguments: int, *args) -> bool:
             """Check whether the number of arguments and argument format matches given argument list."""
             if arguments[0] != args[0]:
                 return False
@@ -72,29 +72,29 @@ class Server:
         response = ''
 
         try:
-            # Login request
+            # Login
             if check_arguments(arguments, 3, 'login'):
                 print('RECEIVED A LOGIN REQUEST AT THE SERVER')
-                if self.bank.current_customer == None:
-                    customer = b.Customer(arguments[1], arguments[2])
-                    if customer == None:
-                        raise ValueError('Failed to retrieve customer data for the provided email and password.')
-                    else:
-                        self.bank.current_customer = customer
-                        response = f'success|{str(customer)}'# + f' (The current_customer is set to ' \
-                                                             #   f'{self.bank.current_customer.fname} ' \
-                                                             #   f'{self.bank.current_customer.lname})'
-                else:
-                    raise ValueError('A customer is already logged into the current session.'
-                                     ' Please log out first.')
+                response = self.bank.login(arguments[1], arguments[2])
 
-            # Get all accounts for current_customer request
+            # Get all accounts for current_customer
             elif check_arguments(arguments, 3, 'customer', 'get', 'all'):
                 if self.bank.current_customer == None:
                     raise ValueError('No customer is currently logged in.')
-                print('RECEIVED A GET REQUEST FROM CUSTOMER TO RETRIEVE ALL THEIR ACCOUNT IDs.')
-                accounts = self.bank.current_customer.get_all_accounts()
-                response = f'success|{"|".join(accounts)}'
+                print('RECEIVED A GET REQUEST FROM CLIENT TO RETRIEVE ALL CURRENT_CUSTOMER ACCOUNT IDs.')
+                account_ids = self.bank.current_customer.get_account_ids()
+                response = f'success|{"|".join(account_ids)}'
+
+            # Get a specific account
+            elif check_arguments(arguments, 3, 'account', 'get'):
+                if self.bank.current_customer == None:
+                    raise ValueError('No customer is currently logged in.')
+                print('RECEIVED A GET REQUEST FROM CLIENT TO RETRIEVE A SPECIFIC ACCOUNT.')
+                account = self.bank.current_customer.get_account(arguments[2])
+                if account:
+                   response = f'success|{str(account)}'
+                else:
+                    raise ValueError(f'Account with id {arguments[2]} not found.')
 
 
             elif arguments[0] == 'terminate':
