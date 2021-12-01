@@ -82,8 +82,8 @@ class Server:
                 if self.bank.current_customer == None:
                     raise ValueError('No customer is currently logged in.')
                 print('RECEIVED A GET REQUEST FROM CLIENT TO RETRIEVE ALL CURRENT_CUSTOMER ACCOUNT IDs.')
-                accounts = self.bank.current_customer.load_all_accounts()
-                response = f'success|{"|".join(accounts)}'
+                account_ids = self.bank.current_customer.get_account_ids()
+                response = f'success|{"|".join(account_ids)}'
 
             # Get a specific account
             elif check_arguments(arguments, 3, 'account', 'get'):
