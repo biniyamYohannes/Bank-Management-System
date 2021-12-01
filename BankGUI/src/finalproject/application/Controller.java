@@ -52,8 +52,6 @@ public class Controller {
         this.updateListAccounts();
     }
 
-// FXML handlers -------------------------------------------------------------------------------------------------------
-
     // Updates the view model for the list of accounts.
     private void updateListAccounts() {
         this.listAccounts.setItems(FXCollections.observableArrayList(Controller.accounts));
@@ -70,6 +68,8 @@ public class Controller {
         Parent root = FXMLLoader.load(getClass().getResource(fxml));
         stage.setScene(new Scene(root, 720, 480));
     }
+
+// FXML handlers -------------------------------------------------------------------------------------------------------
 
     // Loads the create customer scene.
     public void loadCreateCustomer(ActionEvent actionEvent) throws IOException {
@@ -153,8 +153,8 @@ public class Controller {
 
     // Attempts to log into an account on the server with the provided credentials.
     public void login(ActionEvent actionEvent) throws IOException {
-//        Request: login | email | password
-//        Response: {success/fail} | fname | lname | email
+        // Request: login | email | password
+        // Response: {success/fail} | fname | lname | email
 
         // get the values inputted into the text fields
         String email = txtEmail.getText();
@@ -194,8 +194,8 @@ public class Controller {
 
     // Fetches and returns the user's account IDs from the server.
     private String[] getAccountIDs() {
-//        Request: customer | get | all
-//        Response: {success/fail} | accountID1 | accountID2| accountID3 | ...
+        // Request: customer | get | all
+        // Response: {success/fail} | accountID1 | accountID2| accountID3 | ...
 
         String[] accountIDs;
 
@@ -283,8 +283,8 @@ public class Controller {
     
     // Attempts to create a new customer and account on the server.
     public void createCustomer(ActionEvent actionEvent) throws IOException {
-//        Request: customer | create | [fname] | [lname] | [email] | [ssn] | [dob] | [address] | [phone] | password
-//        Response: {success/fail} | errorMsg
+        // Request: customer | create | [fname] | [lname] | [email] | [ssn] | [dob] | [address] | [phone] | password
+        // Response: {success/fail} | errorMsg
 
         // get the values inputted into the text fields
         String firstName = txtFirstName.getText();
@@ -306,9 +306,6 @@ public class Controller {
         String[] respArgs = response.split("\\|");
         switch (respArgs[0]) {
             case "success":
-//                // set the SSN as the current user's SSN
-//                Controller.ssn = ssn;
-
                 // set the current user's info
                 Controller.firstName = firstName;
                 Controller.lastName = lastName;
@@ -327,8 +324,8 @@ public class Controller {
 
     // Attempts to create a new account on the server.
     public void createAccount(ActionEvent actionEvent) throws IOException {
-//        Request: account | create | [email] | [accountType]
-//        Response: {success/fail} | {accountID/errorMsg}
+        // Request: account | create | [email] | [accountType]
+        // Response: {success/fail} | {accountID/errorMsg}
 
         // send create customer request to the server and receive server's response
         String cmd = String.format("account|create|%s|%s", Controller.email, this.selectedAccountType);
