@@ -1,4 +1,8 @@
 package finalproject.application;
+
+import finalproject.application.models.Account;
+import finalproject.application.models.CreditAccount;
+import finalproject.application.models.SavingsAccount;
 import finalproject.client.Client;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -9,22 +13,19 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
-
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Objects;
 
 public class Controller {
     // client and account data for current session
     private static final Client client = new Client();
-    // private static String ssn;
     private static String firstName;
     private static String lastName;
     private static String email;
     private static Account currentAccount;
-    private static ArrayList<Account> accounts = new ArrayList<>();
+    private static final ArrayList<Account> accounts = new ArrayList<>();
 
     // GUI components
     private String selectedAccountType;
@@ -45,24 +46,30 @@ public class Controller {
 
     public Controller() {
         // attempts to connect the client to server on first initialization
-        if (!Controller.client.isConnected())
-            Controller.client.connect();
+        if (!client.isConnected())
+            client.connect();
 
         // initialize the view model for the list of accounts
         this.listAccounts = new ListView<>();
-        this.listAccounts.setItems(FXCollections.observableArrayList(Controller.accounts));
+        this.updateListAccounts();
     }
 
-    // Gets the stage associated with a button click.
+// Scene handlers ------------------------------------------------------------------------------------------------------
+
+    // Updates the view model for the list of accounts.
+    private void updateListAccounts() {
+        this.listAccounts.setItems(FXCollections.observableArrayList(accounts));
+    }
+
+    // Gets the stage associated with an ActionEvent.
     private Stage getStage(ActionEvent actionEvent) {
-        Node button = (Node) actionEvent.getSource();
-        Stage stage = (Stage)button.getScene().getWindow();
-        return stage;
+        Node node = (Node)actionEvent.getSource();
+        return (Stage)node.getScene().getWindow();
     }
 
     // Loads a scene from an FXML file.
     private void loadScene(Stage stage, String fxml) throws IOException {
-        Parent root = FXMLLoader.load(getClass().getResource(fxml));
+        Parent root = FXMLLoader.load(getClass().getResource("views/" + fxml));
         stage.setScene(new Scene(root, 720, 480));
     }
 
@@ -72,6 +79,30 @@ public class Controller {
         this.loadScene(stage, "create_customer.fxml");
     }
 
+    // Loads the add account scene.
+    public void loadAddAccount(ActionEvent actionEvent) throws IOException {
+        Stage stage = getStage(actionEvent);
+        this.loadScene(stage, "add_account.fxml");
+    }
+
+    // Sets the user-selected account type as "savings".
+    public void setSavingsType(){
+        this.menuAccountType.setText("Savings");
+        this.selectedAccountType = "savings";
+    };
+
+    // Sets the user-selected account type as "checking".
+    public void setCheckingType(){
+        this.menuAccountType.setText("Checking");
+        this.selectedAccountType = "checking";
+    };
+
+    // Sets the user-selected account type as "credit".
+    public void setCreditType(){
+        this.menuAccountType.setText("Credit");
+        this.selectedAccountType = "credit";
+    };
+
     // Loads the account selection scene.
     public void loadAccountSelection(ActionEvent actionEvent) throws IOException {
         Stage stage = getStage(actionEvent);
@@ -80,13 +111,7 @@ public class Controller {
 
     // Handles the event that the user clicks on an account in the account list by setting it as the current account
     public void selectAccount(MouseEvent mouseEvent) {
-        Controller.currentAccount = this.listAccounts.getSelectionModel().getSelectedItem();
-    }
-
-    // Loads the add account scene.
-    public void loadAddAccount(ActionEvent actionEvent) throws IOException {
-        Stage stage = getStage(actionEvent);
-        this.loadScene(stage, "add_account.fxml");
+        currentAccount = this.listAccounts.getSelectionModel().getSelectedItem();
     }
 
     // Loads the main account scene.
@@ -94,28 +119,17 @@ public class Controller {
         Stage stage = getStage(actionEvent);
 
         // load the main account scene based on the current account's type
-        String fxml = "";
-        switch (Controller.currentAccount.getType()) {
-            case "savings":
-                fxml = "savings_main.fxml";
-                break;
-            case "checking":
-                fxml = "checking_main.fxml";
-                break;
-            case "credit":
-                fxml = "credit_main.fxml";
-                break;
-        }
-
-        this.loadScene(stage, fxml);
+        this.loadScene(stage, currentAccount.getType() + "_main.fxml");
     }
+
+// Client-server communication handlers --------------------------------------------------------------------------------
 
     // Sends a command to the server via the client, returns the server's response.
     private String sendCommand(String cmd) {
         String response;
-        if (Controller.client.isConnected()) {
+        if (client.isConnected()) {
             try {
-                response = Controller.client.sendRequest(cmd);
+                response = client.sendRequest(cmd);
             } catch (IOException e) {
                 response = "fail|" + e.getMessage();
             }
@@ -128,8 +142,8 @@ public class Controller {
 
     // Attempts to log into an account on the server with the provided credentials.
     public void login(ActionEvent actionEvent) throws IOException {
-//        Request: login | email | password
-//        Response: {success/fail} | fname | lname | email
+        // Request: login | email | password
+        // Response: {success/fail} | fname | lname | email
 
         // get the values inputted into the text fields
         String email = txtEmail.getText();
@@ -144,12 +158,9 @@ public class Controller {
         String[] respArgs = response.split("\\|");
         switch (respArgs[0]) {
             case "success":
-//                // save the user's SSN from the server
-//                Controller.ssn = respArgs[1];
-
                 // set the current user's info
-                Controller.firstName = respArgs[1];
-                Controller.lastName = respArgs[2];
+                firstName = respArgs[1];
+                lastName = respArgs[2];
                 Controller.email = respArgs[3];
 
                 // load the user's accounts
@@ -172,8 +183,8 @@ public class Controller {
 
     // Fetches and returns the user's account IDs from the server.
     private String[] getAccountIDs() {
-//        Request: customer | get | all
-//        Response: {success/fail} | accountID1 | accountID2| accountID3 | ...
+        // Request: customer | get | all
+        // Response: {success/fail} | accountID1 | accountID2| accountID3 | ...
 
         String[] accountIDs;
 
@@ -204,7 +215,7 @@ public class Controller {
         return accountIDs;
     }
 
-    // Request an account's information from the server, returns an Account object containing the account info.
+    // Requests an account's information from the server, returns an Account object containing the account info.
     private Account getAccount(String accountID) {
         // Request: account | get | [accountId]
         // Response: {success/fail} | [Balance] | [AccountType] | {Saving: [interestRate] | Credit Card: [CreditLimit]}
@@ -224,12 +235,19 @@ public class Controller {
                 String accountType = respArgs[2];
 
                 // create account depending on type
-                if (Objects.equals(accountType, "savings"))
-                    account = new SavingsAccount(accountID, accountType, balance, Float.parseFloat(respArgs[3]));
-                else if (Objects.equals(accountType, "credit"))
-                    account = new CreditAccount(accountID, accountType, balance, Float.parseFloat(respArgs[3]));
-                else
-                    account = new Account(accountID, accountType, balance);
+                switch (accountType) {
+                    case "savings":
+                        float interest = Float.parseFloat(respArgs[3]);
+                        account = new SavingsAccount(accountID, accountType, balance, interest);
+                        break;
+                    case "credit":
+                        float limit = Float.parseFloat(respArgs[3]);
+                        account = new CreditAccount(accountID, accountType, balance, limit);
+                        break;
+                    default:
+                        account = new Account(accountID, accountType, balance);
+                        break;
+                }
                 break;
             case "fail":
                 // display failure alert with message from server
@@ -256,13 +274,13 @@ public class Controller {
         }
 
         // update the view model for the list of accounts
-        this.listAccounts.setItems(FXCollections.observableArrayList(Controller.accounts));
+        this.updateListAccounts();
     }
     
     // Attempts to create a new customer and account on the server.
     public void createCustomer(ActionEvent actionEvent) throws IOException {
-//        Request: customer | create | [fname] | [lname] | [email] | [ssn] | [dob] | [address] | [phone] | password
-//        Response: {success/fail} | errorMsg
+        // Request: customer | create | [fname] | [lname] | [email] | [ssn] | [dob] | [address] | [phone] | password
+        // Response: {success/fail} | errorMsg
 
         // get the values inputted into the text fields
         String firstName = txtFirstName.getText();
@@ -284,9 +302,6 @@ public class Controller {
         String[] respArgs = response.split("\\|");
         switch (respArgs[0]) {
             case "success":
-//                // set the SSN as the current user's SSN
-//                Controller.ssn = ssn;
-
                 // set the current user's info
                 Controller.firstName = firstName;
                 Controller.lastName = lastName;
@@ -303,31 +318,13 @@ public class Controller {
         }
     }
 
-    // Sets the user-selected account type as "savings".
-    public void setSavingsType(){
-        this.menuAccountType.setText("Savings");
-        this.selectedAccountType = "savings";
-    };
-
-    // Sets the user-selected account type as "checking".
-    public void setCheckingType(){
-        this.menuAccountType.setText("Checking");
-        this.selectedAccountType = "checking";
-    };
-
-    // Sets the user-selected account type as "credit".
-    public void setCreditType(){
-        this.menuAccountType.setText("Credit");
-        this.selectedAccountType = "credit";
-    };
-
     // Attempts to create a new account on the server.
     public void createAccount(ActionEvent actionEvent) throws IOException {
-//        Request: account | create | [email] | [accountType]
-//        Response: {success/fail} | {accountID/errorMsg}
+        // Request: account | create | [email] | [accountType]
+        // Response: {success/fail} | {accountID/errorMsg}
 
         // send create customer request to the server and receive server's response
-        String cmd = String.format("account|create|%s|%s", Controller.email, this.selectedAccountType);
+        String cmd = String.format("account|create|%s|%s", email, this.selectedAccountType);
         String response = sendCommand(cmd);
 
         // perform actions based on server's response
@@ -342,15 +339,15 @@ public class Controller {
                 Account newAccount = this.getAccount(accountID);
 
                 // set the new account as the current account
-                Controller.currentAccount = newAccount;
+                currentAccount = newAccount;
 
                 // add the new account to the user's list of accounts
-                Controller.accounts.add(newAccount);
+                accounts.add(newAccount);
 
                 // update the view model for the list of accounts
-                this.listAccounts.setItems(FXCollections.observableArrayList(Controller.accounts));
+                this.updateListAccounts();
 
-                // load the main account scene based on account type
+                // load the main account scene
                 this.loadAccountMain(actionEvent);
 
                 // display success alert

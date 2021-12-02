@@ -1,6 +1,6 @@
-package finalproject.application;
+package finalproject.application.models;
 
-public class SavingsAccount extends Account{
+public class SavingsAccount extends Account {
     private final float interest;
 
     public SavingsAccount(String id, String type, float balance, float interest) {
