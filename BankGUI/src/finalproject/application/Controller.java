@@ -63,8 +63,8 @@ public class Controller {
 
     // Gets the stage associated with an ActionEvent.
     private Stage getStage(ActionEvent actionEvent) {
-        Node button = (Node) actionEvent.getSource();
-        return (Stage)button.getScene().getWindow();
+        Node node = (Node)actionEvent.getSource();
+        return (Stage)node.getScene().getWindow();
     }
 
     // Loads a scene from an FXML file.
@@ -119,20 +119,7 @@ public class Controller {
         Stage stage = getStage(actionEvent);
 
         // load the main account scene based on the current account's type
-        String fxml = "";
-        switch (currentAccount.getType()) {
-            case "savings":
-                fxml = "savings_main.fxml";
-                break;
-            case "checking":
-                fxml = "checking_main.fxml";
-                break;
-            case "credit":
-                fxml = "credit_main.fxml";
-                break;
-        }
-
-        this.loadScene(stage, fxml);
+        this.loadScene(stage, currentAccount.getType() + "_main.fxml");
     }
 
 // Client-server communication handlers --------------------------------------------------------------------------------
@@ -250,16 +237,17 @@ public class Controller {
                 // create account depending on type
                 switch (accountType) {
                     case "savings":
-                        account = new SavingsAccount(accountID, accountType, balance, Float.parseFloat(respArgs[3]));
+                        float interest = Float.parseFloat(respArgs[3]);
+                        account = new SavingsAccount(accountID, accountType, balance, interest);
                         break;
                     case "credit":
-                        account = new CreditAccount(accountID, accountType, balance, Float.parseFloat(respArgs[3]));
+                        float limit = Float.parseFloat(respArgs[3]);
+                        account = new CreditAccount(accountID, accountType, balance, limit);
                         break;
                     default:
                         account = new Account(accountID, accountType, balance);
                         break;
                 }
-
                 break;
             case "fail":
                 // display failure alert with message from server
@@ -359,7 +347,7 @@ public class Controller {
                 // update the view model for the list of accounts
                 this.updateListAccounts();
 
-                // load the main account scene based on account type
+                // load the main account scene
                 this.loadAccountMain(actionEvent);
 
                 // display success alert
