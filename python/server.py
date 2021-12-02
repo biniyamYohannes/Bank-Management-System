@@ -37,6 +37,7 @@ class Server:
         server_socket.bind((self.__ip, self.__port))
         server_socket.listen(self.__backlog)
 
+        # Main event loop (accept connection, accept and process requests)
         while self.__keep_running:
             print(f"""[SRV] Waiting for a Client""")
             self.__client_socket, client_address = server_socket.accept()
@@ -55,30 +56,30 @@ class Server:
     def process_client_request(self):
         """Process message received from the client."""
 
-        def check_arguments(arguments: list, num_arguments: int, *args) -> bool:
+        def check_arguments(arguments: list, expect_arguments: int, must_match: int, *args) -> bool:
             """Check whether the number of arguments and argument format matches given argument list."""
-            if arguments[0] != args[0]:
-                return False
-            if len(arguments) != num_arguments:
-                raise ValueError("Number of arguments does not match the requested service.")
+            for i in range(must_match):
+                if arguments[i] != args[i]:
+                    return False
+            if len(arguments) != expect_arguments:
+                raise ValueError("Number of arguments does not match the requested function.")
             for i, arg in enumerate(args):
                 if arguments[i] != arg:
                     raise ValueError(f'The argument at position {i+1} does not match the request format.')
             return True
 
         client_message = self.receive_message()
-        # self.display_message(f'CLIENT SAID>>>{client_message}')
-        arguments = client_message.split('|')
-        response = ''
+        # arguments = client_message.split('|')      # used for local python client testing
+        arguments = client_message[:-2].split('|')      # java sends commands with a \n character at the end
 
         try:
             # Login
-            if check_arguments(arguments, 3, 'login'):
+            if check_arguments(arguments, 3, 1, 'login'):
                 print('RECEIVED A LOGIN REQUEST AT THE SERVER')
                 response = self.bank.login(arguments[1], arguments[2])
 
-            # Get all accounts for current_customer
-            elif check_arguments(arguments, 3, 'customer', 'get', 'all'):
+            # Get all accounts for currently logged in customer
+            elif check_arguments(arguments, 3, 3,'customer', 'get', 'all'):
                 if self.bank.current_customer == None:
                     raise ValueError('No customer is currently logged in.')
                 print('RECEIVED A GET REQUEST FROM CLIENT TO RETRIEVE ALL CURRENT_CUSTOMER ACCOUNT IDs.')
@@ -86,7 +87,7 @@ class Server:
                 response = f'success|{"|".join(account_ids)}'
 
             # Get a specific account
-            elif check_arguments(arguments, 3, 'account', 'get'):
+            elif check_arguments(arguments, 3, 2, 'account', 'get'):
                 if self.bank.current_customer == None:
                     raise ValueError('No customer is currently logged in.')
                 print('RECEIVED A GET REQUEST FROM CLIENT TO RETRIEVE A SPECIFIC ACCOUNT.')
@@ -96,11 +97,13 @@ class Server:
                 else:
                     raise ValueError(f'Account with id {arguments[2]} not found.')
 
-
-            elif arguments[0] == 'terminate':
+            # Terminate client's connection
+            elif check_arguments(arguments, 1, 1, 'terminate'):
                 response = 'TERMINATING CONNECTION...'
                 self.__keep_running_client = False
                 self.bank.current_customer = None
+
+            # Invalid requests
             else:
                 raise ValueError('I could not understand that message.')
 
