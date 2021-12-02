@@ -23,7 +23,7 @@ public class Client {
     }
 
     public Client() {
-        this("192.168.56.1", 10000);
+        this("localhost", 10000);
     }
 
     public boolean isConnected() {
