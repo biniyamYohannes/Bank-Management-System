@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Objects;
 
 public class Controller {
     // client and account data for current session
@@ -47,17 +46,19 @@ public class Controller {
 
     public Controller() {
         // attempts to connect the client to server on first initialization
-        if (!Controller.client.isConnected())
-            Controller.client.connect();
+        if (!client.isConnected())
+            client.connect();
 
         // initialize the view model for the list of accounts
         this.listAccounts = new ListView<>();
         this.updateListAccounts();
     }
 
+// Scene handlers ------------------------------------------------------------------------------------------------------
+
     // Updates the view model for the list of accounts.
     private void updateListAccounts() {
-        this.listAccounts.setItems(FXCollections.observableArrayList(Controller.accounts));
+        this.listAccounts.setItems(FXCollections.observableArrayList(accounts));
     }
 
     // Gets the stage associated with an ActionEvent.
@@ -71,8 +72,6 @@ public class Controller {
         Parent root = FXMLLoader.load(getClass().getResource("views/" + fxml));
         stage.setScene(new Scene(root, 720, 480));
     }
-
-// FXML handlers -------------------------------------------------------------------------------------------------------
 
     // Loads the create customer scene.
     public void loadCreateCustomer(ActionEvent actionEvent) throws IOException {
@@ -112,7 +111,7 @@ public class Controller {
 
     // Handles the event that the user clicks on an account in the account list by setting it as the current account
     public void selectAccount(MouseEvent mouseEvent) {
-        Controller.currentAccount = this.listAccounts.getSelectionModel().getSelectedItem();
+        currentAccount = this.listAccounts.getSelectionModel().getSelectedItem();
     }
 
     // Loads the main account scene.
@@ -121,7 +120,7 @@ public class Controller {
 
         // load the main account scene based on the current account's type
         String fxml = "";
-        switch (Controller.currentAccount.getType()) {
+        switch (currentAccount.getType()) {
             case "savings":
                 fxml = "savings_main.fxml";
                 break;
@@ -136,14 +135,14 @@ public class Controller {
         this.loadScene(stage, fxml);
     }
 
-// Client-server communication -----------------------------------------------------------------------------------------
+// Client-server communication handlers --------------------------------------------------------------------------------
 
     // Sends a command to the server via the client, returns the server's response.
     private String sendCommand(String cmd) {
         String response;
-        if (Controller.client.isConnected()) {
+        if (client.isConnected()) {
             try {
-                response = Controller.client.sendRequest(cmd);
+                response = client.sendRequest(cmd);
             } catch (IOException e) {
                 response = "fail|" + e.getMessage();
             }
@@ -173,8 +172,8 @@ public class Controller {
         switch (respArgs[0]) {
             case "success":
                 // set the current user's info
-                Controller.firstName = respArgs[1];
-                Controller.lastName = respArgs[2];
+                firstName = respArgs[1];
+                lastName = respArgs[2];
                 Controller.email = respArgs[3];
 
                 // load the user's accounts
@@ -229,7 +228,7 @@ public class Controller {
         return accountIDs;
     }
 
-    // Request an account's information from the server, returns an Account object containing the account info.
+    // Requests an account's information from the server, returns an Account object containing the account info.
     private Account getAccount(String accountID) {
         // Request: account | get | [accountId]
         // Response: {success/fail} | [Balance] | [AccountType] | {Saving: [interestRate] | Credit Card: [CreditLimit]}
@@ -249,12 +248,18 @@ public class Controller {
                 String accountType = respArgs[2];
 
                 // create account depending on type
-                if (Objects.equals(accountType, "savings"))
-                    account = new SavingsAccount(accountID, accountType, balance, Float.parseFloat(respArgs[3]));
-                else if (Objects.equals(accountType, "credit"))
-                    account = new CreditAccount(accountID, accountType, balance, Float.parseFloat(respArgs[3]));
-                else
-                    account = new Account(accountID, accountType, balance);
+                switch (accountType) {
+                    case "savings":
+                        account = new SavingsAccount(accountID, accountType, balance, Float.parseFloat(respArgs[3]));
+                        break;
+                    case "credit":
+                        account = new CreditAccount(accountID, accountType, balance, Float.parseFloat(respArgs[3]));
+                        break;
+                    default:
+                        account = new Account(accountID, accountType, balance);
+                        break;
+                }
+
                 break;
             case "fail":
                 // display failure alert with message from server
@@ -272,12 +277,12 @@ public class Controller {
         String[] accountIDs = this.getAccountIDs();
 
         // clear the user's list of accounts
-        Controller.accounts.clear();
+        accounts.clear();
 
         // fetch and store information for each account
         for (String accountID : accountIDs) {
             Account account = this.getAccount(accountID);
-            Controller.accounts.add(account);
+            accounts.add(account);
         }
 
         // update the view model for the list of accounts
@@ -331,7 +336,7 @@ public class Controller {
         // Response: {success/fail} | {accountID/errorMsg}
 
         // send create customer request to the server and receive server's response
-        String cmd = String.format("account|create|%s|%s", Controller.email, this.selectedAccountType);
+        String cmd = String.format("account|create|%s|%s", email, this.selectedAccountType);
         String response = sendCommand(cmd);
 
         // perform actions based on server's response
@@ -346,10 +351,10 @@ public class Controller {
                 Account newAccount = this.getAccount(accountID);
 
                 // set the new account as the current account
-                Controller.currentAccount = newAccount;
+                currentAccount = newAccount;
 
                 // add the new account to the user's list of accounts
-                Controller.accounts.add(newAccount);
+                accounts.add(newAccount);
 
                 // update the view model for the list of accounts
                 this.updateListAccounts();
