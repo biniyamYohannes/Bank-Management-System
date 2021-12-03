@@ -33,12 +33,6 @@ class Transaction:
 # Class Account
 class Account:
     """Class that will represent a customer's bank account."""
-    # def __init__(self, acc_id: str, acc_type: int, balance: float):
-    #     """Account constructor."""
-    #     self.__acc_id = acc_id
-    #     self.__acc_type = acc_type
-    #     self.__balance = balance
-    #     self.__transactions = []
 
     def __new__(cls, acc_id: str):
         """Create an instance of the customer class if there is a password match."""
