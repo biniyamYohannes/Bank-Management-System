@@ -18,6 +18,6 @@ public class Account {
     @Override
     public String toString()
     {
-        return String.format("#%s (%s)", this.id, this.type);
+        return String.format("#%s (%s) - $%s", this.id, this.type, this.balance);
     }
 }

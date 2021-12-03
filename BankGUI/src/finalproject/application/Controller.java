@@ -141,6 +141,18 @@ public class Controller {
         return response;
     }
 
+    // Displays a success alert.
+    private void successAlert(String message) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, message, ButtonType.OK);
+        alert.show();
+    }
+
+    // Displays a failure alert.
+    private void failAlert(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR, message, ButtonType.OK);
+        alert.show();
+    }
+
     // Attempts to log into an account on the server with the provided credentials.
     public void login(ActionEvent actionEvent) throws IOException {
         // Request: login | email | password
@@ -155,7 +167,6 @@ public class Controller {
         String response = sendCommand(cmd);
 
         // perform actions based on server's response
-        Alert alert;
         String[] respArgs = response.split("\\|");
         switch (respArgs[0]) {
             case "success":
@@ -171,14 +182,13 @@ public class Controller {
                 this.loadAccountSelection(actionEvent);
 
                 // display success alert
-                alert = new Alert(Alert.AlertType.CONFIRMATION, "Login successful.", ButtonType.OK);
-                alert.show();
+                this.successAlert("Login successful.");
                 break;
 
             case "fail":
                 // display failure alert with message from server
-                alert = new Alert(Alert.AlertType.ERROR, respArgs[1], ButtonType.OK);
-                alert.show();
+                this.failAlert(respArgs[1]);
+                break;
         }
     }
 
@@ -194,7 +204,6 @@ public class Controller {
         String response = sendCommand(cmd);
 
         // perform actions based on server's response
-        Alert alert;
         String[] respArgs = response.split("\\|");
         switch (respArgs[0]) {
             case "success":
@@ -207,8 +216,7 @@ public class Controller {
                 accountIDs = new String[]{};
 
                 // display failure alert with message from server
-                alert = new Alert(Alert.AlertType.ERROR, respArgs[1], ButtonType.OK);
-                alert.show();
+                this.failAlert(respArgs[1]);
                 break;
             default:
                 throw new IllegalStateException("Unexpected value: " + respArgs[0]);
@@ -227,7 +235,6 @@ public class Controller {
         String response = sendCommand(cmd);
 
         // perform actions based on server's response
-        Alert alert;
         String[] respArgs = response.split("\\|");
         Account account = null;
         switch (respArgs[0]) {
@@ -254,8 +261,7 @@ public class Controller {
 
             case "fail":
                 // display failure alert with message from server
-                alert = new Alert(Alert.AlertType.ERROR, respArgs[1], ButtonType.OK);
-                alert.show();
+                this.failAlert(respArgs[1]);
                 break;
         }
 
@@ -301,7 +307,6 @@ public class Controller {
         String response = sendCommand(cmd);
 
         // perform actions based on server's response
-        Alert alert;
         String[] respArgs = response.split("\\|");
         switch (respArgs[0]) {
             case "success":
@@ -316,8 +321,7 @@ public class Controller {
 
             case "fail":
                 // display failure alert with message from server
-                alert = new Alert(Alert.AlertType.ERROR, respArgs[1], ButtonType.OK);
-                alert.show();
+                this.failAlert(respArgs[1]);
                 break;
         }
     }
@@ -332,7 +336,6 @@ public class Controller {
         String response = sendCommand(cmd);
 
         // perform actions based on server's response
-        Alert alert;
         String[] respArgs = response.split("\\|");
         switch (respArgs[0]) {
             case "success":
@@ -355,14 +358,12 @@ public class Controller {
                 this.loadAccountMain(actionEvent);
 
                 // display success alert
-                alert = new Alert(Alert.AlertType.CONFIRMATION, "Account successfully created.", ButtonType.OK);
-                alert.show();
+                this.successAlert("Account successfully created.");
                 break;
 
             case "fail":
                 // display failure alert with message from server
-                alert = new Alert(Alert.AlertType.ERROR, respArgs[1], ButtonType.OK);
-                alert.show();
+                this.failAlert(respArgs[1]);
                 break;
         }
     }
