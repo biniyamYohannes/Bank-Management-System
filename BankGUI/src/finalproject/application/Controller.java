@@ -52,15 +52,10 @@ public class Controller {
     }
 
     public void initialize() {
-        this.updateListAccounts();
+        this.listAccounts.setItems(FXCollections.observableArrayList(accounts));
     }
 
 // Scene handlers ------------------------------------------------------------------------------------------------------
-
-    // Updates the view model for the list of accounts.
-    private void updateListAccounts() {
-        this.listAccounts.setItems(FXCollections.observableArrayList(accounts));
-    }
 
     // Gets the stage associated with an ActionEvent.
     private Stage getStage(ActionEvent actionEvent) {
@@ -182,7 +177,7 @@ public class Controller {
                 this.loadAccountSelection(actionEvent);
 
                 // display success alert
-                this.successAlert("Login successful.");
+//                this.successAlert("Login successful.");
                 break;
 
             case "fail":
@@ -281,9 +276,6 @@ public class Controller {
             Account account = this.getAccount(accountID);
             accounts.add(account);
         }
-
-        // update the view model for the list of accounts
-        this.updateListAccounts();
     }
     
     // Attempts to create a new customer and account on the server.
@@ -350,9 +342,6 @@ public class Controller {
 
                 // add the new account to the user's list of accounts
                 accounts.add(newAccount);
-
-                // update the view model for the list of accounts
-                this.updateListAccounts();
 
                 // load the main account scene
                 this.loadAccountMain(actionEvent);
