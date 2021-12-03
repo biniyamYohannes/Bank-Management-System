@@ -45,12 +45,13 @@ public class Controller {
     public Button btnSelectAccount;
 
     public Controller() {
-        // attempts to connect the client to server on first initialization
         if (!client.isConnected())
             client.connect();
 
-        // initialize the view model for the list of accounts
         this.listAccounts = new ListView<>();
+    }
+
+    public void initialize() {
         this.updateListAccounts();
     }
 
@@ -173,11 +174,11 @@ public class Controller {
                 alert = new Alert(Alert.AlertType.CONFIRMATION, "Login successful.", ButtonType.OK);
                 alert.show();
                 break;
+
             case "fail":
                 // display failure alert with message from server
                 alert = new Alert(Alert.AlertType.ERROR, respArgs[1], ButtonType.OK);
                 alert.show();
-                break;
         }
     }
 
@@ -200,6 +201,7 @@ public class Controller {
                 // get the account IDs
                 accountIDs = Arrays.copyOfRange(respArgs, 1, respArgs.length);
                 break;
+
             case "fail":
                 // return an empty array
                 accountIDs = new String[]{};
@@ -249,6 +251,7 @@ public class Controller {
                         break;
                 }
                 break;
+
             case "fail":
                 // display failure alert with message from server
                 alert = new Alert(Alert.AlertType.ERROR, respArgs[1], ButtonType.OK);
@@ -310,6 +313,7 @@ public class Controller {
                 // send create account request to the server
                 this.createAccount(actionEvent);
                 break;
+
             case "fail":
                 // display failure alert with message from server
                 alert = new Alert(Alert.AlertType.ERROR, respArgs[1], ButtonType.OK);
@@ -354,6 +358,7 @@ public class Controller {
                 alert = new Alert(Alert.AlertType.CONFIRMATION, "Account successfully created.", ButtonType.OK);
                 alert.show();
                 break;
+
             case "fail":
                 // display failure alert with message from server
                 alert = new Alert(Alert.AlertType.ERROR, respArgs[1], ButtonType.OK);
