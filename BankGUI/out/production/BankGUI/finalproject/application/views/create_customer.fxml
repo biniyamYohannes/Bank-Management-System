@@ -64,6 +64,7 @@
             <Font name="Arial" size="24.0" />
          </font>
       </Text>
-      <Button fx:id="btnCreateAccount" layoutX="136.0" layoutY="349.0" mnemonicParsing="false" onAction="#createCustomer" prefWidth="280.0" text="Create Account" />
+      <Button fx:id="btnCreateAccount" layoutX="235.0" layoutY="347.0" mnemonicParsing="false" onAction="#createCustomer" prefHeight="26.0" prefWidth="165.0" text="Create Account" />
+      <Button fx:id="btnBack" layoutX="27.0" layoutY="347.0" mnemonicParsing="false" onAction="#loadLogin" prefHeight="26.0" prefWidth="68.0" text="Back" />
    </children>
 </AnchorPane>
