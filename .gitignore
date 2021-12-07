@@ -2,3 +2,4 @@
 python/.idea/
 python/__pycache__/
 BankGUI/out/
+.DS_Store
