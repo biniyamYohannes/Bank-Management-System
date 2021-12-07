@@ -75,14 +75,14 @@ class Server:
 
 
         client_message = self.receive_message()
-        arguments = client_message.split('|')      # used for local python client testing
-        # arguments = client_message[:-2].split('|')      # java sends commands with a \n character at the end
+        arguments = client_message.split('|')             # USE WITH PYTHON: used for local python client testing
+        # arguments = client_message[:-2].split('|')      # USE WITH JAVA: java sends commands with a \n character at the end
 
         try:
             # Login
             if check_arguments(arguments, 3, 1, 'login'):
                 print('RECEIVED A LOGIN REQUEST AT THE SERVER')
-                response = self.bank.login(arguments[1], arguments[2])
+                response = f'success|{str(self.bank.login(arguments[1], arguments[2]))}'
 
             # Get all accounts for currently logged in customer
             elif check_arguments(arguments, 3, 3,'customer', 'get', 'all'):
@@ -111,6 +111,14 @@ class Server:
                 elif transactions == None:
                     raise ValueError(f'No transactions for account with id {arguments[2]} were found.'
                                      f' Make sure the requested account id belongs to the currently logged in customer.')
+
+            elif check_arguments(arguments, 4, 2, 'transaction', 'put'):
+                is_logged_in()
+                print(f'RECEIVED A REQUEST FROM CLIENT TO PERFORM A TRANSACTION ON ACCOUNT WITH ID = {arguments[2]}.')
+                response = f'success|{self.bank.current_customer.perform_transaction(arguments[2], arguments[3])}'
+
+
+
 
             # Terminate client's connection
             elif check_arguments(arguments, 1, 1, 'terminate'):
