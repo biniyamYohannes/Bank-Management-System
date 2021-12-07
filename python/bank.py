@@ -53,7 +53,7 @@ class Account:
                 # Create a new instance and set attributes on it
                 instance = super().__new__(cls)  # empty instance
                 instance.__acc_id = row[0]
-                instance.__balance = row[1]
+                instance.__acc_balance = row[1]
                 instance.__acc_type = row[2]
                 instance.__acc_rate = row[3]
                 instance.__acc_limit = row[4]
@@ -79,7 +79,7 @@ class Account:
             my_db = mysql.connector.connect(host=Bank.DB['hostname'],port=Bank.DB['port'],
                                             user=Bank.DB['user'],password=Bank.DB['passwd'],
                                             database=Bank.DB['db'])
-            print('SELECT trans_created, trans_amount, trans_account_id, trans_id FROM transaction WHERE trans_account_id = {}'.format(self.acc_id))
+
             cursor = my_db.cursor()
             cursor.execute('SELECT trans_created, trans_amount, trans_account_id, trans_id '
                            'FROM transaction '
@@ -95,38 +95,87 @@ class Account:
         except:
             print('Something went wrong when retrieving transactions from the database.')
 
+    def perform_transaction(self, amount: float):
+        """Perform a deposit/withdrawal in the provided amount."""
+        try:
+            my_db = mysql.connector.connect(host=Bank.DB['hostname'],port=Bank.DB['port'],
+                                            user=Bank.DB['user'],password=Bank.DB['passwd'],
+                                            database=Bank.DB['db'])
+            cursor = my_db.cursor()
+            cursor.execute('INSERT INTO transaction (trans_amount, trans_account_id) VALUES (%s, %s);', (amount, self.acc_id,))
+            my_db.commit()
+            cursor.close()
+            my_db.close()
+        except:
+            print('Something went wrong when inserting transaction into the database.')
+
+        self.update_balance(amount)
+        self.load_all_transactions()
+
+        return self.acc_balance
+
+    def update_balance(self, amount: float):
+        """Update the account balance"""
+        new_balance = self.acc_balance + amount
+
+        try:
+            my_db = mysql.connector.connect(host=Bank.DB['hostname'],port=Bank.DB['port'],
+                                            user=Bank.DB['user'],password=Bank.DB['passwd'],
+                                            database=Bank.DB['db'])
+            cursor = my_db.cursor()
+            cursor.execute('UPDATE account SET acc_balance = %s WHERE acc_id = %s;', (new_balance, self.acc_id,))
+            my_db.commit()
+            cursor.close()
+            my_db.close()
+        except:
+            print('Something went wrong when inserting transaction into the database.')
+
+        self.acc_balance = new_balance
+
     @property
     def acc_id(self):
         """Get Account id."""
         return self.__acc_id
 
     @property
-    def type(self):
+    def acc_type(self):
         """Get Account type."""
         return self.__acc_type
 
     @property
-    def balance(self):
+    def acc_balance(self):
         """Get Account balance."""
-        return self.__balance
+        return self.__acc_balance
 
     @property
-    def rate(self):
+    def acc_rate(self):
         """Get Account balance."""
         return self.__acc_rate
 
     @property
+    def acc_limit(self):
+        """Get Account limit."""
+        return self.__acc_limit
+
+    @property
     def transactions(self):
+        """Get transactions list."""
         return self.__transactions
 
     @transactions.setter
     def transactions(self, transaction_list):
+        """Set transactions list."""
         self.__transactions = transaction_list
+
+    @acc_balance.setter
+    def acc_balance(self, balance: float):
+        """Set account balance."""
+        self.__acc_balance = balance
 
 
     def __str__(self):
         """String representation of an Account object."""
-        return f'{self.balance}|{self.type}|{self.rate}'
+        return f'{self.acc_balance}|{self.type}|{self.rate}'
 
 # ##################################################################################################
 
@@ -216,6 +265,21 @@ class Customer:
         else:
             return None
 
+    def perform_transaction(self, account_id: str, amount: float):
+        """Perform a deposit/withdrawal on the specified account."""
+        amount = float(amount)
+        acc = self.get_account(account_id)
+        if not acc:
+            raise ValueError("Could not find an account with the given account ID. "
+                             "Make sure that the account id belongs to the currently logged in customer.")
+        else:
+            if amount + acc.acc_balance > acc.acc_limit:
+                raise ValueError("The provided deposit amount would exceed this account's limit.")
+            elif amount + acc.acc_balance < 0:
+                raise ValueError("Not enough funds to withdraw the provided amount from this account.")
+            else:
+                return acc.perform_transaction(amount)
+
     @property
     def fname(self):
         """Get customer's first name."""
@@ -289,7 +353,7 @@ class Bank:
         if not self.current_customer:
             raise ValueError('Login failed. Failed to retrieve customer data for the provided email and password.')
         else:
-            return f'success|{str(self.current_customer)}'
+            return self.current_customer
 
     def __str__(self):
         """String representation of a Bank object."""
