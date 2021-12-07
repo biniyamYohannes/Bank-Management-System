@@ -68,9 +68,15 @@ class Server:
                     raise ValueError(f'The argument at position {i+1} does not match the request format.')
             return True
 
+        def is_logged_in():
+            """Raise a ValueError if no customer is currently logged in."""
+            if self.bank.current_customer == None:
+                raise ValueError('No customer is currently logged in.')
+
+
         client_message = self.receive_message()
-        # arguments = client_message.split('|')      # used for local python client testing
-        arguments = client_message[:-2].split('|')      # java sends commands with a \n character at the end
+        arguments = client_message.split('|')      # used for local python client testing
+        # arguments = client_message[:-2].split('|')      # java sends commands with a \n character at the end
 
         try:
             # Login
@@ -80,22 +86,31 @@ class Server:
 
             # Get all accounts for currently logged in customer
             elif check_arguments(arguments, 3, 3,'customer', 'get', 'all'):
-                if self.bank.current_customer == None:
-                    raise ValueError('No customer is currently logged in.')
+                is_logged_in()
                 print('RECEIVED A GET REQUEST FROM CLIENT TO RETRIEVE ALL CURRENT_CUSTOMER ACCOUNT IDs.')
                 account_ids = self.bank.current_customer.get_account_ids()
                 response = f'success|{"|".join(account_ids)}'
 
             # Get a specific account
             elif check_arguments(arguments, 3, 2, 'account', 'get'):
-                if self.bank.current_customer == None:
-                    raise ValueError('No customer is currently logged in.')
+                is_logged_in()
                 print('RECEIVED A GET REQUEST FROM CLIENT TO RETRIEVE A SPECIFIC ACCOUNT.')
                 account = self.bank.current_customer.get_account(arguments[2])
                 if account:
                    response = f'success|{str(account)}'
                 else:
                     raise ValueError(f'Account with id {arguments[2]} not found.')
+
+            # Get all transactions for the requested account
+            elif check_arguments(arguments, 3, 2,'transaction', 'get'):
+                is_logged_in()
+                print(f'RECEIVED A GET REQUEST FROM CLIENT TO RETRIEVE TRANSACTIONS FOR ACCOUNT WITH ID = {arguments[2]}.')
+                transactions = self.bank.current_customer.get_transactions(arguments[2])
+                if transactions:
+                    response = f'success|{"|".join(transactions)}'
+                elif transactions == None:
+                    raise ValueError(f'No transactions for account with id {arguments[2]} were found.'
+                                     f' Make sure the requested account id belongs to the currently logged in customer.')
 
             # Terminate client's connection
             elif check_arguments(arguments, 1, 1, 'terminate'):
