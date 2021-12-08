@@ -18,9 +18,9 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 public class Controller {
+
     // client and account data for current session
     private static final Client client = new Client();
     private static String firstName;
@@ -40,10 +40,11 @@ public class Controller {
     public MenuButton menuAccountType;
     public TextField txtSSN;
     public PasswordField txtPassword;
+    public TextField txtAmount;
     public Label labelFirstName;
     public Label labelAccount;
     public ListView<Account> listAccounts;
-    public ListView<Transaction> listRecentTransactions;
+    public ListView<Transaction> listTransactions;
     public Button btnCreateAccount;
     public Button btnLogin;
     public Button btnAddAccount;
@@ -51,7 +52,7 @@ public class Controller {
     public Button btnSelectAccount;
     public Button btnWithdraw;
     public Button btnDeposit;
-    public Button btnTransactions;
+    public Button btnPay;
 
     public Controller() {
         if (!client.isConnected())
@@ -60,11 +61,12 @@ public class Controller {
         this.labelFirstName = new Label();
         this.labelAccount = new Label();
         this.listAccounts = new ListView<>();
-        this.listRecentTransactions = new ListView<>();
+        this.listTransactions = new ListView<>();
     }
 
     public void initialize() {
-        // initialize the GUI for user's first name and list of accounts
+        
+        // initialize GUI components for user's first name and list of accounts
         this.labelFirstName.setText(firstName);
         this.listAccounts.setItems(FXCollections.observableArrayList(accounts));
 
@@ -75,19 +77,8 @@ public class Controller {
         // initialize GUI component for account name
         this.labelAccount.setText(currentAccount.toString());
 
-        // get the current account's transactions
-        ArrayList<Transaction> transactions = currentAccount.getTransactions();
-
-        // get the current account's most recent 7 transactions
-        List<Transaction> recentTransactions;
-        try {
-            recentTransactions = transactions.subList(0, 7);
-        } catch(IndexOutOfBoundsException e) {
-            recentTransactions = transactions;
-        }
-
-        // initialize GUI component for recent transactions
-        this.listRecentTransactions.setItems(FXCollections.observableArrayList(recentTransactions));
+        // initialize GUI component for transactions
+        this.listTransactions.setItems(FXCollections.observableArrayList(currentAccount.getTransactions()));
     }
 
 // Scene handlers ------------------------------------------------------------------------------------------------------
@@ -163,9 +154,9 @@ public class Controller {
         this.loadScene(actionEvent, "account_deposit.fxml");
     }
 
-    // Loads the account transactions scene.
-    public void loadTransactions(ActionEvent actionEvent) throws IOException {
-        this.loadScene(actionEvent, "account_transactions.fxml");
+    // Loads the credit payment scene.
+    public void loadPayment(ActionEvent actionEvent) throws IOException {
+        this.loadScene(actionEvent, "credit_payment.fxml");
     }
 
 // Client-server communication handlers --------------------------------------------------------------------------------
@@ -214,8 +205,8 @@ public class Controller {
         switch (respArgs[0]) {
             case "success":
                 // set the current user's info
-                firstName = respArgs[1];
-                lastName = respArgs[2];
+                Controller.firstName = respArgs[1];
+                Controller.lastName = respArgs[2];
                 Controller.email = respArgs[3];
 
                 // load the user's accounts
@@ -230,12 +221,13 @@ public class Controller {
 
 //                firstName= "Andy";
 //                lastName = "Le";
-//                Account checking = new Account("1", "checking", 200);
 //                Transaction trans1 = new Transaction(LocalDate.of(2017, 1, 13), 100);
 //                Transaction trans2 = new Transaction(LocalDate.of(2017, 2, 13), -50);
-//                checking.addTransaction(trans1);
-//                checking.addTransaction(trans2);
-//                accounts.add(checking);
+//                ArrayList<Transaction> transactions = new ArrayList<>();
+//                transactions.add(trans1);
+//                transactions.add(trans2);
+//                Account savings = new SavingsAccount("1", "savings", 200, transactions, 2);
+//                accounts.add(savings);
 //                this.loadAccountSelection(actionEvent);
 
                 break;
@@ -287,19 +279,21 @@ public class Controller {
                 float balance = Float.parseFloat(respArgs[1]);
                 String accountType = respArgs[2];
 
+                // get the account's transactions
+                ArrayList<Transaction> transactions = this.getTransactions(accountID);
+
                 // create account depending on type
                 switch (accountType) {
                     case "savings":
                         float interest = Float.parseFloat(respArgs[3]);
-                        account = new SavingsAccount(accountID, accountType, balance, interest);
+                        account = new SavingsAccount(accountID, accountType, balance, transactions, interest);
                         break;
                     case "credit":
                         float limit = Float.parseFloat(respArgs[3]);
-                        account = new CreditAccount(accountID, accountType, balance, limit);
+                        account = new CreditAccount(accountID, accountType, balance, transactions, limit);
                         break;
                     default:
-                        account = new Account(accountID, accountType, balance);
-                        break;
+                        account = new Account(accountID, accountType, balance, transactions);
                 }
                 break;
 
@@ -310,6 +304,39 @@ public class Controller {
         }
 
         return account;
+    }
+
+    // Fetches an account's transactions from the server. Returns the transactions as an ArrayList.
+    private ArrayList<Transaction> getTransactions(String accountID) {
+
+        ArrayList<Transaction> transactions = new ArrayList<>();
+
+        // send account transactions request to the server and receive server's response.
+        String cmd = String.format("transaction|get|%s", accountID);
+        String response = sendCommand(cmd);
+
+        // perform actions based on server's response
+        String[] respArgs = response.split("\\|");
+        switch (respArgs[0]) {
+            case "success":
+                // get the account transactions
+                for (String transactionStr : Arrays.copyOfRange(respArgs, 1, respArgs.length)) {
+                    String[] transactionArgs = transactionStr.split(",");
+                    LocalDate date = LocalDate.parse(transactionArgs[0]);
+                    float amount = Float.parseFloat(transactionArgs[1]);
+                    transactions.add(new Transaction(date, amount));
+                }
+                break;
+
+            case "fail":
+                this.failAlert(respArgs[1]);
+                break;
+
+            default:
+                throw new IllegalStateException("Unexpected value: " + respArgs[0]);
+        }
+
+        return transactions;
     }
 
     // Fetches and stores the current user's accounts from the server.
@@ -402,6 +429,34 @@ public class Controller {
             case "fail":
                 this.failAlert(respArgs[1]);
                 break;
+        }
+    }
+
+    // Sends an account transaction request to the server.
+    public void transact(ActionEvent actionEvent) throws IOException {
+
+        // get the user-inputted amount to transact
+        float amount = Float.parseFloat(this.txtAmount.getText());
+
+        // send account transactions request to the server and receive server's response.
+        String cmd = String.format("transaction|put|%s|%f", currentAccount.getID(), amount);
+        String response = sendCommand(cmd);
+
+        // perform actions based on server's response
+        String[] respArgs = response.split("\\|");
+        switch (respArgs[0]) {
+            case "success":
+                currentAccount.addTransaction(new Transaction(LocalDate.now(), amount));
+                this.loadAccountMain(actionEvent);
+                this.successAlert("Transaction successful.");
+                break;
+
+            case "fail":
+                this.failAlert(respArgs[1]);
+                break;
+
+            default:
+                throw new IllegalStateException("Unexpected value: " + respArgs[0]);
         }
     }
 }
