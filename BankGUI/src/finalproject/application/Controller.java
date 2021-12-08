@@ -53,6 +53,7 @@ public class Controller {
     public Button btnWithdraw;
     public Button btnDeposit;
     public Button btnPay;
+    public Button btnLogout;
 
     public Controller() {
         if (!client.isConnected())
@@ -458,5 +459,37 @@ public class Controller {
             default:
                 throw new IllegalStateException("Unexpected value: " + respArgs[0]);
         }
+    }
+
+    // Sends a logout request to the server.
+    public void logout(ActionEvent actionEvent) throws IOException {
+
+        // send logout request to the server and receive server's response.
+        String cmd = "logout";
+        String response = sendCommand(cmd);
+
+        // perform actions based on server's response
+        String[] respArgs = response.split("\\|");
+        switch (respArgs[0]) {
+            case "success":
+                // clear the current user's info
+                firstName = "";
+                lastName = "";
+                email = "";
+                currentAccount = null;
+                accounts.clear();
+
+                // load the login scene
+                this.loadLogin(actionEvent);
+                break;
+
+            case "fail":
+                this.failAlert(respArgs[1]);
+                break;
+        }
+    }
+
+    public void exitApplication(ActionEvent event) {
+
     }
 }
