@@ -175,7 +175,7 @@ class Account:
 
     def __str__(self):
         """String representation of an Account object."""
-        return f'{self.acc_balance}|{self.type}|{self.rate}'
+        return f'{self.acc_balance}|{self.acc_type}|{self.acc_rate}'
 
 # ##################################################################################################
 
@@ -263,7 +263,8 @@ class Customer:
             acc.load_all_transactions()
             return [f"{str(transaction)}" for transaction in acc.transactions]
         else:
-            return None
+            raise ValueError("The requested account could not be retrieved. "
+                             "Make sure the requested account id belongs to the currently logged in customer.")
 
     def perform_transaction(self, account_id: str, amount: float):
         """Perform a deposit/withdrawal on the specified account."""
@@ -313,6 +314,7 @@ class Customer:
 # Class Bank
 class Bank:
     DB = {'hostname': 'localhost', 'port': 3306, 'user': 'root', 'passwd': 'password', 'db': 'test'}
+    logged_in = []
 
     """Class that will represent a bank."""
     def __init__(self, name: str):
@@ -353,6 +355,7 @@ class Bank:
         if not self.current_customer:
             raise ValueError('Login failed. Failed to retrieve customer data for the provided email and password.')
         else:
+            Bank.logged_in.append(self.current_customer.email)
             return self.current_customer
 
     def __str__(self):
@@ -360,9 +363,3 @@ class Bank:
         return f'Name: {self.name} | Customers: {len(self.customers)}'
 
 # ##################################################################################################
-
-# Test code
-if __name__ == "__main__":
-    customer = Customer('biniyam.yohannes@ucdenver.edu', 'password')
-    customer.load_all_accounts()
-
