@@ -158,9 +158,14 @@ class ClientWorker(Thread):
 
             # Modify account and insert transaction
             elif check_arguments(arguments, 4, 2, 'transaction', 'put'):
-                is_logged_in()
                 print(f'RECEIVED A REQUEST FROM CLIENT TO PERFORM A TRANSACTION ON ACCOUNT WITH ID = {arguments[2]}.')
+                is_logged_in()
                 response = f'success|{self.bank.current_customer.perform_transaction(arguments[2], arguments[3])}'
+
+            elif check_arguments(arguments, 1, 1, 'logout'):
+                print(f'RECEIVED A LOGOUt REQUEST FROM THE CLIENT.')
+                is_logged_in()
+                response = f'{self.bank.logout()}'
 
             # Terminate client's connection
             elif check_arguments(arguments, 1, 1, 'terminate'):
