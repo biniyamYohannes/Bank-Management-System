@@ -398,11 +398,11 @@ public class Controller {
 
     // Attempts to create a new account on the server.
     public void createAccount(ActionEvent actionEvent) throws IOException {
-        // Request: account | create | [email] | [accountType]
+        // Request: account | create | [accountType]
         // Response: {success/fail} | {accountID/errorMsg}
 
         // send create customer request to the server and receive server's response
-        String cmd = String.format("account|create|%s|%s", email, this.selectedAccountType);
+        String cmd = String.format("account|create|%s", this.selectedAccountType);
         String response = sendCommand(cmd);
 
         // perform actions based on server's response
@@ -474,7 +474,7 @@ public class Controller {
         String[] respArgs = response.split("\\|");
         switch (respArgs[0]) {
             case "success":
-                // clear the current user's info
+                // clear the current user's data
                 firstName = "";
                 lastName = "";
                 email = "";
