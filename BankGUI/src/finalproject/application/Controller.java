@@ -439,6 +439,10 @@ public class Controller {
         // get the user-inputted amount to transact
         float amount = Float.parseFloat(this.txtAmount.getText());
 
+        // change the amount to negative if the transaction is a withdrawal
+        if (actionEvent.getSource() == btnWithdraw)
+            amount *= -1;
+
         // send account transactions request to the server and receive server's response.
         String cmd = String.format("transaction|put|%s|%f", currentAccount.getID(), amount);
         String response = sendCommand(cmd);
