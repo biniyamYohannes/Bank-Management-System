@@ -8,18 +8,29 @@ public class Account {
     private float balance;
     private final ArrayList<Transaction> transactions;
 
-    public Account(String id, String type, float balance) {
+    public Account(String id, String type, float balance, ArrayList<Transaction> transactions) {
         this.id = id;
         this.type = type;
         this.balance = balance;
-        this.transactions = new ArrayList<>();
+        this.transactions = transactions;
     }
 
+    public String getID() { return this.id; }
+
     public String getType() { return this.type; }
+
     public float getBalance() { return this.balance; }
-    public void setBalance(float balance) { this.balance = balance; }
-    public ArrayList<Transaction> getTransactions() { return this.transactions; }
-    public void addTransaction(Transaction transaction) { this.transactions.add(transaction); }
+
+    public ArrayList<Transaction> getTransactions() {
+        // sort transactions from most recent first
+        this.transactions.sort(new TransactionSorter());
+        return this.transactions;
+    }
+
+    public void addTransaction(Transaction transaction) {
+        this.transactions.add(transaction);
+        this.balance += transaction.getAmount();
+    }
 
     @Override
     public String toString()
@@ -27,3 +38,5 @@ public class Account {
         return String.format("#%s (%s) - Current Balance: $%.2f", this.id, this.type, this.balance);
     }
 }
+
+

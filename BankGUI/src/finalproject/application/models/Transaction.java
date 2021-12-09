@@ -18,9 +18,9 @@ public class Transaction {
     @Override
     public String toString()
     {
-        return String.format("%s - %s$%.2f",
+        return String.format("%s (%s$%.2f)",
                 this.date,
-                this.amount < 0 ? "Withdrew " : "Deposited ",
+                this.amount < 0 ? "-" : "+",
                 Math.abs(this.amount));
     }
 }
