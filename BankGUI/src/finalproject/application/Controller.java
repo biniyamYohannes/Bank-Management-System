@@ -320,11 +320,15 @@ public class Controller {
         String[] respArgs = response.split("\\|");
         switch (respArgs[0]) {
             case "success":
-                // get the account transactions
+                // get string representations of transactions from server
                 for (String transactionStr : Arrays.copyOfRange(respArgs, 1, respArgs.length)) {
+
+                    // split each string representation and parse into date and amount
                     String[] transactionArgs = transactionStr.split(",");
                     LocalDate date = LocalDate.parse(transactionArgs[0]);
                     float amount = Float.parseFloat(transactionArgs[1]);
+
+                    // add the transaction
                     transactions.add(new Transaction(date, amount));
                 }
                 break;
@@ -332,9 +336,6 @@ public class Controller {
             case "fail":
                 this.failAlert(respArgs[1]);
                 break;
-
-            default:
-                throw new IllegalStateException("Unexpected value: " + respArgs[0]);
         }
 
         return transactions;
@@ -440,10 +441,10 @@ public class Controller {
         float amount = Float.parseFloat(this.txtAmount.getText());
 
         // change the amount to negative if the transaction is a withdrawal
-        if (actionEvent.getSource() == btnWithdraw)
+        if (actionEvent.getSource() == this.btnWithdraw)
             amount *= -1;
 
-        // send account transactions request to the server and receive server's response.
+        // send transaction request to the server and receive server's response.
         String cmd = String.format("transaction|put|%s|%f", currentAccount.getID(), amount);
         String response = sendCommand(cmd);
 
@@ -459,9 +460,6 @@ public class Controller {
             case "fail":
                 this.failAlert(respArgs[1]);
                 break;
-
-            default:
-                throw new IllegalStateException("Unexpected value: " + respArgs[0]);
         }
     }
 
