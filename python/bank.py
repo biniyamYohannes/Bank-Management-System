@@ -320,7 +320,7 @@ class Bank:
     def __init__(self, name: str):
         """Bank constructor."""
         self.__name = name
-        self.__customers = []
+        # self.__customers = []
         self.__current_customer = None
 
     @property
@@ -328,10 +328,10 @@ class Bank:
         """Get Bank's name attribute."""
         return self.__name
 
-    @property
-    def customers(self):
-        """Get Bank's list of customers."""
-        return self.__customers
+    # @property
+    # def customers(self):
+    #     """Get Bank's list of customers."""
+    #     return self.__customers
 
     @property
     def current_customer(self):
@@ -358,8 +358,13 @@ class Bank:
             Bank.logged_in.append(self.current_customer.email)
             return self.current_customer
 
+    def logout(self):
+        Bank.logged_in.remove(self.current_customer.email)
+        self.current_customer = None
+        return 'success|'
+
     def __str__(self):
         """String representation of a Bank object."""
-        return f'Name: {self.name} | Customers: {len(self.customers)}'
+        return f'Name: {self.name}'
 
 # ##################################################################################################
