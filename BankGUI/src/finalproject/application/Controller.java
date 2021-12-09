@@ -264,6 +264,40 @@ public class Controller {
         return accountIDs;
     }
 
+    // Fetches an account's transactions from the server. Returns the transactions as an ArrayList.
+    private ArrayList<Transaction> getTransactions(String accountID) {
+
+        ArrayList<Transaction> transactions = new ArrayList<>();
+
+        // send account transactions request to the server and receive server's response.
+        String cmd = String.format("transaction|get|%s", accountID);
+        String response = sendCommand(cmd);
+
+        // perform actions based on server's response
+        String[] respArgs = response.split("\\|");
+        switch (respArgs[0]) {
+            case "success":
+                // get string representations for each transaction from server
+                for (String transactionStr : Arrays.copyOfRange(respArgs, 1, respArgs.length)) {
+
+                    // split string representation and parse into date and amount
+                    String[] transactionArgs = transactionStr.split(",");
+                    LocalDate date = LocalDate.parse(transactionArgs[0]);
+                    float amount = Float.parseFloat(transactionArgs[1]);
+
+                    // add the transaction
+                    transactions.add(new Transaction(date, amount));
+                }
+                break;
+
+            case "fail":
+                this.failAlert(respArgs[1]);
+                break;
+        }
+
+        return transactions;
+    }
+
     // Requests an account's information from the server, returns an Account object containing the account info.
     private Account getAccount(String accountID) {
 
@@ -305,40 +339,6 @@ public class Controller {
         }
 
         return account;
-    }
-
-    // Fetches an account's transactions from the server. Returns the transactions as an ArrayList.
-    private ArrayList<Transaction> getTransactions(String accountID) {
-
-        ArrayList<Transaction> transactions = new ArrayList<>();
-
-        // send account transactions request to the server and receive server's response.
-        String cmd = String.format("transaction|get|%s", accountID);
-        String response = sendCommand(cmd);
-
-        // perform actions based on server's response
-        String[] respArgs = response.split("\\|");
-        switch (respArgs[0]) {
-            case "success":
-                // get string representations of transactions from server
-                for (String transactionStr : Arrays.copyOfRange(respArgs, 1, respArgs.length)) {
-
-                    // split each string representation and parse into date and amount
-                    String[] transactionArgs = transactionStr.split(",");
-                    LocalDate date = LocalDate.parse(transactionArgs[0]);
-                    float amount = Float.parseFloat(transactionArgs[1]);
-
-                    // add the transaction
-                    transactions.add(new Transaction(date, amount));
-                }
-                break;
-
-            case "fail":
-                this.failAlert(respArgs[1]);
-                break;
-        }
-
-        return transactions;
     }
 
     // Fetches and stores the current user's accounts from the server.
