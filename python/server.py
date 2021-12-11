@@ -176,6 +176,12 @@ class ClientWorker(Thread):
                 self.bank.current_customer.add_account(arguments[2], arguments[3], arguments[4])
                 response = 'success|'
 
+            elif check_arguments(arguments, 4, 1, 'transfer'):
+                print(f'RECEIVED A TRANSFER REQUEST FROM CLIENT TO TRANSFER {arguments[3]} FROM ACCOUNT {arguments[1]} '
+                      f'TO ACCOUNT {arguments[2]}')
+                is_logged_in()
+                response = f'success|{self.bank.current_customer.transfer(arguments[1], arguments[2], float(arguments[3]))}'
+
             # Logout
             elif check_arguments(arguments, 1, 1, 'logout'):
                 print(f'RECEIVED A LOGOUt REQUEST FROM THE CLIENT.')
