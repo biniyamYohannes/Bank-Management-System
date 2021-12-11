@@ -1,8 +1,8 @@
 package finalproject.application;
 
 import finalproject.application.models.Account;
-import finalproject.application.models.CreditAccount;
-import finalproject.application.models.SavingsAccount;
+//import finalproject.application.models.CreditAccount;
+//import finalproject.application.models.SavingsAccount;
 import finalproject.application.models.Transaction;
 import finalproject.client.Client;
 import javafx.collections.FXCollections;
@@ -317,23 +317,24 @@ public class Controller {
                 // get the server's responses
                 float balance = Float.parseFloat(respArgs[1]);
                 String accountType = respArgs[2];
+                float rate = Float.parseFloat(respArgs[3]);
 
                 // get the account's transactions
                 ArrayList<Transaction> transactions = this.getTransactions(accountID);
 
-                // create account depending on type
-                switch (accountType) {
-                    case "savings":
-                        float interest = Float.parseFloat(respArgs[3]);
-                        account = new SavingsAccount(accountID, accountType, balance, transactions, interest);
-                        break;
-                    case "credit":
-                        float limit = Float.parseFloat(respArgs[3]);
-                        account = new CreditAccount(accountID, accountType, balance, transactions, limit);
-                        break;
-                    default:
-                        account = new Account(accountID, accountType, balance, transactions);
-                }
+                account = new Account(accountID, accountType, balance, transactions);
+
+//                // create account depending on type
+//                switch (accountType) {
+//                    case "savings":
+//                        account = new SavingsAccount(accountID, accountType, balance, transactions, rate);
+//                        break;
+//                    case "credit":
+//                        account = new CreditAccount(accountID, accountType, balance, transactions, rate);
+//                        break;
+//                    default:
+//                        account = new Account(accountID, accountType, balance, transactions, rate);
+//                }
                 break;
 
             case "fail":
@@ -400,11 +401,9 @@ public class Controller {
 
     // Attempts to create a new account on the server.
     public void createAccount(ActionEvent actionEvent) throws IOException {
-        // Request: account | create | [accountType]
-        // Response: {success/fail} | {accountID/errorMsg}
 
         // send create customer request to the server and receive server's response
-        String cmd = String.format("account|create|%s", this.selectedAccountType);
+        String cmd = String.format("account|post|%s", this.selectedAccountType);
         String response = sendCommand(cmd);
 
         // perform actions based on server's response
