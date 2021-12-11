@@ -40,7 +40,7 @@ class Account:
     """Class that will represent a customer's bank account."""
 
     def __new__(cls, acc_id: str):
-        """Create an instance of the customer class if there is a password match."""
+        """Create an instance of the account class."""
         try:
             my_db = mysql.connector.connect(host=Bank.DB['hostname'], port=Bank.DB['port'],
                                             user=Bank.DB['user'], password=Bank.DB['passwd'],
@@ -222,7 +222,7 @@ class Customer:
                            'WHERE acc_email = %s', (self.email,))
 
             for row in cursor.fetchall():
-                self.add_account(row[0])    # populate the accounts list with Account objects
+                self.append_account(row[0])    # populate the accounts list with Account objects
 
             cursor.close()
             my_db.close()
@@ -231,8 +231,8 @@ class Customer:
         except:
             print('Something went wrong when retrieving account ids from the database.')
 
-    def add_account(self, id: int):
-        """Add an account to the list of customer's accounts."""
+    def append_account(self, id: int):
+        """Append an account to the list of customer's accounts."""
         self.accounts.append(Account(id))
 
     def get_account_ids(self) -> list:
@@ -281,6 +281,20 @@ class Customer:
             else:
                 return acc.perform_transaction(amount)
 
+    def add_account(self, type: str, rate: float, limit: float):
+        """Add an account associated with the current customer."""
+        my_db = mysql.connector.connect(host=Bank.DB['hostname'],port=Bank.DB['port'],
+                                        user=Bank.DB['user'],password=Bank.DB['passwd'],
+                                        database=Bank.DB['db'])
+        cursor = my_db.cursor()
+        cursor.execute('INSERT INTO account (acc_type, acc_rate, acc_limit, acc_balance, acc_email) '
+                       'VALUES (%s, %s, %s, 0, %s);', (type, rate, limit, self.email))
+        my_db.commit()
+        cursor.close()
+        my_db.close()
+
+        self.load_all_accounts()
+
     @property
     def fname(self):
         """Get customer's first name."""
@@ -320,18 +334,12 @@ class Bank:
     def __init__(self, name: str):
         """Bank constructor."""
         self.__name = name
-        # self.__customers = []
         self.__current_customer = None
 
     @property
     def name(self):
         """Get Bank's name attribute."""
         return self.__name
-
-    # @property
-    # def customers(self):
-    #     """Get Bank's list of customers."""
-    #     return self.__customers
 
     @property
     def current_customer(self):
