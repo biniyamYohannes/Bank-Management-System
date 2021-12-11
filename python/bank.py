@@ -295,6 +295,27 @@ class Customer:
 
         self.load_all_accounts()
 
+    def transfer(self, from_id: str, to_id: str, amount: float):
+        """Transfer money from one of the user's accounts to another account."""
+        source = self.get_account(from_id)
+        destination = Account(to_id)
+
+        if not (source and destination):
+            raise ValueError("At least one of the accounts could not be found. Also make sure that the source account"
+                             "belongs to the current customer.")
+        if (amount <= 0):
+            raise ValueError("Transfer amounts have to be greater than zero.")
+        if (source.acc_balance < amount):
+            raise ValueError("There are not enough funds in this account to perform the transfer.")
+
+        source.perform_transaction(-amount)
+        destination.perform_transaction(amount)
+
+        return source.acc_balance
+
+
+
+
     @property
     def fname(self):
         """Get customer's first name."""
