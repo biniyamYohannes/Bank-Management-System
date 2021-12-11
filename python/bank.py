@@ -46,7 +46,7 @@ class Account:
                                             user=Bank.DB['user'], password=Bank.DB['passwd'],
                                             database=Bank.DB['db'])
             cursor = my_db.cursor()
-            cursor.execute('SELECT acc_id, acc_balance, acc_type, acc_rate, acc_limit, acc_email '
+            cursor.execute('SELECT acc_id, acc_balance, acc_type, acc_email '
                            'FROM account '
                            'WHERE acc_id = %s', (acc_id,))
             for row in cursor.fetchall():
@@ -55,9 +55,7 @@ class Account:
                 instance.__acc_id = row[0]
                 instance.__acc_balance = row[1]
                 instance.__acc_type = row[2]
-                instance.__acc_rate = row[3]
-                instance.__acc_limit = row[4]
-                instance.__acc_email = row[5]
+                instance.__acc_email = row[3]
                 instance.__transactions = []
                 return instance
         except:
@@ -147,15 +145,10 @@ class Account:
         """Get Account balance."""
         return self.__acc_balance
 
-    @property
-    def acc_rate(self):
-        """Get Account balance."""
-        return self.__acc_rate
-
-    @property
-    def acc_limit(self):
-        """Get Account limit."""
-        return self.__acc_limit
+    # @property
+    # def acc_rate(self):
+    #     """Get Account balance."""
+    #     return self.__acc_rate
 
     @property
     def transactions(self):
@@ -175,7 +168,7 @@ class Account:
 
     def __str__(self):
         """String representation of an Account object."""
-        return f'{self.acc_balance}|{self.acc_type}|{self.acc_rate}'
+        return f'{self.acc_balance}|{self.acc_type}'
 
 # ##################################################################################################
 
@@ -257,6 +250,7 @@ class Customer:
         self.accounts = []
 
     def get_transactions(self, account_id: str):
+        # TODO: return success and an empty list if the account exists but has no transactions
         """Return all transactions for a given account."""
         acc = self.get_account(account_id)
         if acc:
@@ -274,26 +268,26 @@ class Customer:
             raise ValueError("Could not find an account with the given account ID. "
                              "Make sure that the account id belongs to the currently logged in customer.")
         else:
-            if amount + acc.acc_balance > acc.acc_limit:
-                raise ValueError("The provided deposit amount would exceed this account's limit.")
-            elif amount + acc.acc_balance < 0:
+            if amount + acc.acc_balance < 0:
                 raise ValueError("Not enough funds to withdraw the provided amount from this account.")
             else:
                 return acc.perform_transaction(amount)
 
-    def add_account(self, type: str, rate: float, limit: float):
+    def add_account(self, type: str):
         """Add an account associated with the current customer."""
         my_db = mysql.connector.connect(host=Bank.DB['hostname'],port=Bank.DB['port'],
                                         user=Bank.DB['user'],password=Bank.DB['passwd'],
                                         database=Bank.DB['db'])
         cursor = my_db.cursor()
-        cursor.execute('INSERT INTO account (acc_type, acc_rate, acc_limit, acc_balance, acc_email) '
-                       'VALUES (%s, %s, %s, 0, %s);', (type, rate, limit, self.email))
+        cursor.execute('INSERT INTO account (acc_type, acc_balance, acc_email) '
+                       'VALUES (%s, 0, %s);', (type, self.email))
         my_db.commit()
         cursor.close()
         my_db.close()
 
         self.load_all_accounts()
+        sorted_accounts = sorted(self.accounts, key=lambda x: x.acc_id)
+        return sorted_accounts[-1].acc_id
 
     def transfer(self, from_id: str, to_id: str, amount: float):
         """Transfer money from one of the user's accounts to another account."""
@@ -312,9 +306,6 @@ class Customer:
         destination.perform_transaction(amount)
 
         return source.acc_balance
-
-
-
 
     @property
     def fname(self):
@@ -377,6 +368,8 @@ class Bank:
 
     def add_customer(self, fname: str, lname:str, email:str, password: str):
         """Add a new customer into the database."""
+        if not (fname and lname and email and password):
+            raise ValueError("One of the arguments is null.")
         my_db = mysql.connector.connect(host=Bank.DB['hostname'],port=Bank.DB['port'],
                                         user=Bank.DB['user'],password=Bank.DB['passwd'],
                                         database=Bank.DB['db'])

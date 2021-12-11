@@ -317,7 +317,7 @@ public class Controller {
                 // get the server's responses
                 float balance = Float.parseFloat(respArgs[1]);
                 String accountType = respArgs[2];
-                float rate = Float.parseFloat(respArgs[3]);
+                // float rate = Float.parseFloat(respArgs[3]);
 
                 // get the account's transactions
                 ArrayList<Transaction> transactions = this.getTransactions(accountID);
