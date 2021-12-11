@@ -359,8 +359,6 @@ public class Controller {
     
     // Attempts to create a new customer and account on the server.
     public void createCustomer(ActionEvent actionEvent) throws IOException {
-        // Request: customer | create | [fname] | [lname] | [email] | [ssn] | [dob] | [address] | [phone] | password
-        // Response: {success/fail} | errorMsg
 
         // get the values inputted into the text fields
         String firstName = txtFirstName.getText();
@@ -373,8 +371,8 @@ public class Controller {
         String password = txtPassword.getText();
 
         // send create customer request to the server and receive server's response.
-        String cmd = String.format("customer|create|%s|%s|%s|%s|%s|%s|%s|%s",
-                firstName, lastName, email, ssn, dob, address, phone, password);
+        String cmd = String.format("customer|post|%s|%s|%s|%s",
+                firstName, lastName, email, password);
         String response = sendCommand(cmd);
 
         // perform actions based on server's response
