@@ -346,6 +346,18 @@ class Bank:
         """Create a new Customer object by retrieving their data from the db."""
         return Customer(email, password)
 
+    def add_customer(self, fname: str, lname:str, email:str, password: str):
+        """Add a new customer into the database."""
+        my_db = mysql.connector.connect(host=Bank.DB['hostname'],port=Bank.DB['port'],
+                                        user=Bank.DB['user'],password=Bank.DB['passwd'],
+                                        database=Bank.DB['db'])
+        cursor = my_db.cursor()
+        cursor.execute('INSERT INTO customer (cust_fname, cust_lname, cust_email, cust_pass) '
+                       'VALUES (%s, %s, %s, %s);', (fname, lname, email, password))
+        my_db.commit()
+        cursor.close()
+        my_db.close()
+
     def login(self, email: str, password: str):
         """Log in a user based on credentials."""
         if self.current_customer:
