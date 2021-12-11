@@ -16,6 +16,8 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -282,11 +284,12 @@ public class Controller {
 
                     // split string representation and parse into date and amount
                     String[] transactionArgs = transactionStr.split(",");
-                    LocalDate date = LocalDate.parse(transactionArgs[0]);
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+                    LocalDateTime dateTime = LocalDateTime.parse(transactionArgs[0], formatter);
                     float amount = Float.parseFloat(transactionArgs[1]);
 
                     // add the transaction
-                    transactions.add(new Transaction(date, amount));
+                    transactions.add(new Transaction(dateTime, amount));
                 }
                 break;
 
@@ -450,7 +453,7 @@ public class Controller {
         String[] respArgs = response.split("\\|");
         switch (respArgs[0]) {
             case "success":
-                currentAccount.addTransaction(new Transaction(LocalDate.now(), amount));
+                currentAccount.addTransaction(new Transaction(LocalDateTime.now(), amount));
                 this.loadAccountMain(actionEvent);
                 this.successAlert("Transaction successful.");
                 break;
