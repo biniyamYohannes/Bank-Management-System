@@ -17,6 +17,7 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -224,12 +225,12 @@ public class Controller {
 
 //                firstName= "Andy";
 //                lastName = "Le";
-//                Transaction trans1 = new Transaction(LocalDate.of(2017, 1, 13), 100);
-//                Transaction trans2 = new Transaction(LocalDate.of(2017, 2, 13), -50);
+//                Transaction trans1 = new Transaction(LocalDateTime.of(2019, Month.MARCH, 28, 14, 33, 48), 100);
+//                Transaction trans2 = new Transaction(LocalDateTime.of(2020, Month.MARCH, 28, 14, 33, 48), -50);
 //                ArrayList<Transaction> transactions = new ArrayList<>();
 //                transactions.add(trans1);
 //                transactions.add(trans2);
-//                Account savings = new SavingsAccount("1", "savings", 200, transactions, 2);
+//                Account savings = new CreditAccount("1", "credit", 200, transactions, 2000);
 //                accounts.add(savings);
 //                this.loadAccountSelection(actionEvent);
 

@@ -13,8 +13,14 @@ public class CreditAccount extends Account {
     public float getLimit() { return this.limit; }
 
     @Override
+    public float getBalance() {
+        // return the account's remaining credit
+        return this.limit - super.getBalance();
+    }
+
+    @Override
     public String toString()
     {
-        return String.format("%s - Limit: %.2f%%", super.toString(), this.limit);
+        return String.format("%s | Limit: $%.2f", super.toString(), this.limit);
     }
 }

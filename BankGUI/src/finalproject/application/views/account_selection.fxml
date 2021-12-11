@@ -8,14 +8,24 @@
 
 <AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="finalproject.application.Controller">
    <children>
-      <Label layoutX="25.0" layoutY="27.0" text="Select an account">
+      <Label layoutX="31.0" layoutY="82.0" text="Select an account">
+         <font>
+            <Font name="Arial" size="18.0" />
+         </font>
+      </Label>
+      <ListView fx:id="listAccounts" layoutX="31.0" layoutY="109.0" onMouseClicked="#selectAccount" prefHeight="223.0" prefWidth="539.0" />
+      <Button fx:id="btnAddAccount" layoutX="235.0" layoutY="354.0" mnemonicParsing="false" onAction="#loadAddAccount" text="Add New Account" />
+      <Button fx:id="btnSelectAccount" layoutX="467.0" layoutY="354.0" mnemonicParsing="false" onAction="#loadAccountMain" prefHeight="26.0" prefWidth="103.0" text="Next" />
+      <Button fx:id="btnLogout" layoutX="31.0" layoutY="355.0" mnemonicParsing="false" onAction="#logout" prefHeight="26.0" prefWidth="91.0" text="Logout" />
+      <Label layoutX="31.0" layoutY="26.0" prefHeight="27.0" prefWidth="110.0" text="Welcome,">
          <font>
             <Font name="Arial" size="24.0" />
          </font>
       </Label>
-      <ListView fx:id="listAccounts" layoutX="31.0" layoutY="69.0" onMouseClicked="#selectAccount" prefHeight="263.0" prefWidth="539.0" />
-      <Button fx:id="btnAddAccount" layoutX="235.0" layoutY="354.0" mnemonicParsing="false" onAction="#loadAddAccount" text="Add New Account" />
-      <Button fx:id="btnSelectAccount" layoutX="467.0" layoutY="354.0" mnemonicParsing="false" onAction="#loadAccountMain" prefHeight="26.0" prefWidth="103.0" text="Next" />
-      <Button fx:id="btnLogout" layoutX="31.0" layoutY="355.0" mnemonicParsing="false" onAction="#logout" prefHeight="26.0" prefWidth="91.0" text="Logout" />
+      <Label fx:id="labelFirstName" layoutX="140.0" layoutY="26.0" text="firstName">
+         <font>
+            <Font size="24.0" />
+         </font>
+      </Label>
    </children>
 </AnchorPane>

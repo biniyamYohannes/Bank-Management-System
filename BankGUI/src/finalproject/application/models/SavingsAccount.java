@@ -15,6 +15,6 @@ public class SavingsAccount extends Account {
     @Override
     public String toString()
     {
-        return String.format("%s - Interest: %.2f%%", super.toString(), this.interest);
+        return String.format("%s | Interest: %.2f%%", super.toString(), this.interest);
     }
 }

@@ -35,7 +35,7 @@ public class Account {
     @Override
     public String toString()
     {
-        return String.format("#%s (%s) - Current Balance: $%.2f", this.id, this.type, this.balance);
+        return String.format("#%s (%s) | Current Balance: $%.2f", this.id, this.type, this.getBalance());
     }
 }
 

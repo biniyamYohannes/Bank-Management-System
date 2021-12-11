@@ -8,16 +8,6 @@
 
 <AnchorPane prefHeight="459.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="finalproject.application.Controller">
     <children>
-        <Label layoutX="28.0" layoutY="17.0" prefHeight="27.0" prefWidth="110.0" text="Welcome,">
-            <font>
-                <Font name="Arial" size="24.0" />
-            </font>
-        </Label>
-        <Label fx:id="labelFirstName" layoutX="137.0" layoutY="17.0" text="firstName">
-            <font>
-                <Font size="24.0" />
-            </font>
-        </Label>
         <Button fx:id="btnBack" layoutX="26.0" layoutY="344.0" mnemonicParsing="false" onAction="#loadAccountSelection" text="Back" />
         <Label layoutX="25.0" layoutY="122.0" text="Past Transactions">
             <font>
