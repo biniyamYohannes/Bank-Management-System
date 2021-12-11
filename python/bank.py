@@ -30,8 +30,8 @@ class Transaction:
 
     def __str__(self):
         """String representation of a Transaction object."""
-        return f'{self.timestamp.year}-{self.timestamp.month}-{self.timestamp.day} {self.timestamp.hour}:' \
-               f'{self.timestamp.minute}:{self.timestamp.second},{self.amount:.2f}'
+        return f'{self.timestamp.year}-{self.timestamp.month:02}-{self.timestamp.day:02} {self.timestamp.hour:02}:' \
+               f'{self.timestamp.minute:02},{self.amount:.2f}'
 
 # ##################################################################################################
 
