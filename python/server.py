@@ -1,4 +1,5 @@
 import socket
+from mysql.connector.errors import IntegrityError
 from bank import Bank
 from threading import Thread
 
@@ -162,6 +163,13 @@ class ClientWorker(Thread):
                 is_logged_in()
                 response = f'success|{self.bank.current_customer.perform_transaction(arguments[2], arguments[3])}'
 
+            elif check_arguments(arguments, 6, 2, 'customer', 'post'):
+                print(f'RECEIVED A REQUEST FROM CLIENT TO CREATE A NEW CUSTOMER WITH FIRST NAME {arguments[2]},'
+                      f' LAST NAME {arguments[3]}, EMAIL {arguments[4]}, AND PASSWORD {"*" * len(arguments[5])}.')
+                self.bank.add_customer(arguments[2], arguments[3], arguments[4], arguments[5])
+                response = 'success|'
+
+            # Logout
             elif check_arguments(arguments, 1, 1, 'logout'):
                 print(f'RECEIVED A LOGOUt REQUEST FROM THE CLIENT.')
                 is_logged_in()
@@ -179,7 +187,7 @@ class ClientWorker(Thread):
             else:
                 raise ValueError('I could not understand that message.')
 
-        except (ValueError, IndexError) as ve:
+        except (ValueError, IndexError, IntegrityError) as ve:
             response = 'fail|' + str(ve)
             print('Something went wrong when processing the request.')
 
