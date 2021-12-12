@@ -30,8 +30,8 @@ class Transaction:
 
     def __str__(self):
         """String representation of a Transaction object."""
-        return f'{self.timestamp.year}-{self.timestamp.month:02}-{self.timestamp.day:02} {self.timestamp.hour:02}:' \
-               f'{self.timestamp.minute:02},{self.amount:.2f}'
+        return f'{self.timestamp.year}-{self.timestamp.month:02}-{self.timestamp.day:02}' \
+               f' {self.timestamp.hour:02}:{self.timestamp.minute:02},{self.amount:.2f}'
 
 # ##################################################################################################
 
@@ -84,7 +84,7 @@ class Account:
                            'WHERE trans_account_id = %s', (self.acc_id,))
 
             for row in cursor.fetchall():
-                self.add_transaction(row[0], row[1], row[3])    # populate the transactions list with Transaction objects
+                self.add_transaction(row[0], row[1], row[3])
 
             cursor.close()
             my_db.close()
@@ -100,7 +100,8 @@ class Account:
                                             user=Bank.DB['user'],password=Bank.DB['passwd'],
                                             database=Bank.DB['db'])
             cursor = my_db.cursor()
-            cursor.execute('INSERT INTO transaction (trans_amount, trans_account_id) VALUES (%s, %s);', (amount, self.acc_id,))
+            cursor.execute('INSERT INTO transaction (trans_amount, trans_account_id) '
+                           'VALUES (%s, %s);', (amount, self.acc_id,))
             my_db.commit()
             cursor.close()
             my_db.close()
@@ -121,7 +122,8 @@ class Account:
                                             user=Bank.DB['user'],password=Bank.DB['passwd'],
                                             database=Bank.DB['db'])
             cursor = my_db.cursor()
-            cursor.execute('UPDATE account SET acc_balance = %s WHERE acc_id = %s;', (new_balance, self.acc_id,))
+            cursor.execute('UPDATE account SET acc_balance = %s '
+                           'WHERE acc_id = %s;', (new_balance, self.acc_id,))
             my_db.commit()
             cursor.close()
             my_db.close()
@@ -190,14 +192,13 @@ class Customer:
                 if row[2] != password:
                     print('Password validation failed.')
                     return None
-                else:
-                    # create a new instance and set attributes on it
-                    instance = super().__new__(cls)  # empty instance
-                    instance.__fname = row[0]
-                    instance.__lname = row[1]
-                    instance.__email = email
-                    instance.__accounts = []
-                    return instance
+                # create a new instance and set attributes on it
+                instance = super().__new__(cls)  # empty instance
+                instance.__fname = row[0]
+                instance.__lname = row[1]
+                instance.__email = email
+                instance.__accounts = []
+                return instance
         except:
             print('Customer:__new__: Something went wrong trying to reach the DB.')
             return None
@@ -250,15 +251,14 @@ class Customer:
         self.accounts = []
 
     def get_transactions(self, account_id: str):
-        # TODO: return success and an empty list if the account exists but has no transactions
         """Return all transactions for a given account."""
         acc = self.get_account(account_id)
         if acc:
             acc.load_all_transactions()
             return [f"{str(transaction)}" for transaction in acc.transactions]
-        else:
-            raise ValueError("The requested account could not be retrieved. "
-                             "Make sure the requested account id belongs to the currently logged in customer.")
+        raise ValueError("The requested account could not be retrieved. "
+                         "Make sure the requested account id belongs to "
+                         "the currently logged in customer.")
 
     def perform_transaction(self, account_id: str, amount: float):
         """Perform a deposit/withdrawal on the specified account."""
@@ -266,12 +266,12 @@ class Customer:
         acc = self.get_account(account_id)
         if not acc:
             raise ValueError("Could not find an account with the given account ID. "
-                             "Make sure that the account id belongs to the currently logged in customer.")
-        else:
-            if amount + acc.acc_balance < 0:
-                raise ValueError("Not enough funds to withdraw the provided amount from this account.")
-            else:
-                return acc.perform_transaction(amount)
+                             "Make sure that the account id belongs to the currently "
+                             "logged in customer.")
+        if amount + acc.acc_balance < 0:
+            raise ValueError("Not enough funds to withdraw the provided amount "
+                             "from this account.")
+        return acc.perform_transaction(amount)
 
     def add_account(self, type: str):
         """Add an account associated with the current customer."""
@@ -295,7 +295,8 @@ class Customer:
         destination = Account(to_id)
 
         if not (source and destination):
-            raise ValueError("At least one of the accounts could not be found. Also make sure that the source account"
+            raise ValueError("At least one of the accounts could not be found. "
+                             "Also make sure that the source account"
                              "belongs to the current customer.")
         if (amount <= 0):
             raise ValueError("Transfer amounts have to be greater than zero.")
@@ -339,10 +340,10 @@ class Customer:
 
 # Class Bank
 class Bank:
+    """Class that willl represent an account transaction (deposit/withdrawal)."""
     DB = {'hostname': 'localhost', 'port': 3306, 'user': 'root', 'passwd': 'password', 'db': 'test'}
     logged_in = []
 
-    """Class that will represent a bank."""
     def __init__(self, name: str):
         """Bank constructor."""
         self.__name = name
@@ -384,15 +385,15 @@ class Bank:
         """Log in a user based on credentials."""
         if self.current_customer:
             raise ValueError('Another customer is already logged into the session.')
-        else:
-            self.current_customer = self.create_customer(email, password)
+        self.current_customer = self.create_customer(email, password)
         if not self.current_customer:
-            raise ValueError('Login failed. Failed to retrieve customer data for the provided email and password.')
-        else:
-            Bank.logged_in.append(self.current_customer.email)
-            return self.current_customer
+            raise ValueError('Login failed. '
+                             'Failed to retrieve customer for the provided email and password.')
+        Bank.logged_in.append(self.current_customer.email)
+        return self.current_customer
 
     def logout(self):
+        """Remove a customer from the logged_in list and set current_customer to None."""
         Bank.logged_in.remove(self.current_customer.email)
         self.current_customer = None
         return 'success|'

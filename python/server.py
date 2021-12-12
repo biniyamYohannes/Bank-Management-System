@@ -1,7 +1,10 @@
+# server.py
+"""Implements a multithreaded server that can serve multiple clients.."""
+
 import socket
+from threading import Thread
 from mysql.connector.errors import IntegrityError, DataError
 from bank import Bank
-from threading import Thread
 
 class MultiServer:
     """MultiServer class that handles multiple client connections."""
@@ -18,11 +21,13 @@ class MultiServer:
         self.__list_cw = []
 
     def terminate_server(self):
+        """Terminate the server."""
         self.__keep_running = False
         self.__server_socket.close()
 
     @property
     def bank(self):
+        """Bank getter."""
         return self.__bank
 
     def run(self):
@@ -33,7 +38,7 @@ class MultiServer:
 
         # Main event loop (accept connection, accept and process requests)
         while self.__keep_running:
-            print(f"""[SRV] Waiting for a Client""")
+            print("""[SRV] Waiting for a Client""")
             try:
                 client_socket, client_address = self.__server_socket.accept()
 
@@ -63,9 +68,11 @@ class ClientWorker(Thread):
 
     @property
     def bank(self):
+        """Bank getter."""
         return self.__bank
 
     def run(self):
+        """Run method that will launch the worker thread."""
         self.send_message("Connected to Python Bank Server\n")
 
         while self.__keep_running_client:
@@ -74,10 +81,12 @@ class ClientWorker(Thread):
         self.__client_socket.close()
 
     def terminate_connection(self):
+        """Terminate the client connection but keep the server running."""
         self.__keep_running_client = False
         self.__client_socket.close()
 
     def display_message(self, message: str):
+        """Displays the message received from the client."""
         print(f'[SRV] >> {message}')
 
     def send_message(self, msg: str):
@@ -95,7 +104,8 @@ class ClientWorker(Thread):
         """Process message received from the client."""
 
         def check_arguments(arguments: list, expect_arguments: int, must_match: int, *args) -> bool:
-            """Check whether the number of arguments and argument format matches given argument list."""
+            """Check whether the number of arguments and
+            argument format matches given argument list."""
             for i in range(must_match):
                 if arguments[i] != args[i]:
                     return False
@@ -103,12 +113,13 @@ class ClientWorker(Thread):
                 raise ValueError("Number of arguments does not match the requested function.")
             for i, arg in enumerate(args):
                 if arguments[i] != arg:
-                    raise ValueError(f'The argument at position {i + 1} does not match the request format.')
+                    raise ValueError(f'The argument at position {i + 1} '
+                                     f'does not match the request format.')
             return True
 
         def is_logged_in():
             """Raise a ValueError if no customer is currently logged in."""
-            if self.bank.current_customer == None:
+            if self.bank.current_customer is None:
                 raise ValueError('No customer is currently logged in.')
 
         def no_duplicate_login(email: str):
@@ -116,12 +127,11 @@ class ClientWorker(Thread):
             if email in Bank.logged_in:
                 raise ValueError('Another customer with these credentials is already logged in. '
                                  'Close your other session first.')
-            else:
-                return True
+            return True
 
         client_message = self.receive_message()
         # arguments = client_message.split('|')      # used for local python client testing
-        arguments = client_message[:-2].split('|')  # java sends commands with a \n character at the end
+        arguments = client_message[:-2].split('|')   # java message format
 
         try:
             # Login
@@ -133,7 +143,8 @@ class ClientWorker(Thread):
             # Get all accounts for currently logged in customer
             elif check_arguments(arguments, 3, 3,'customer', 'get', 'all'):
                 is_logged_in()
-                print('RECEIVED A GET REQUEST FROM CLIENT TO RETRIEVE ALL CURRENT_CUSTOMER ACCOUNT IDs.')
+                print('RECEIVED A GET REQUEST FROM CLIENT TO RETRIEVE '
+                      'ALL CURRENT_CUSTOMER ACCOUNT IDs.')
                 account_ids = self.bank.current_customer.get_account_ids()
                 response = f'success|{"|".join(account_ids)}'
 
@@ -143,48 +154,49 @@ class ClientWorker(Thread):
                 print('RECEIVED A GET REQUEST FROM CLIENT TO RETRIEVE A SPECIFIC ACCOUNT.')
                 account = self.bank.current_customer.get_account(arguments[2])
                 if account:
-                   response = f'success|{str(account)}'
+                    response = f'success|{str(account)}'
                 else:
                     raise ValueError(f'Account with id {arguments[2]} not found.')
 
             # Get all transactions for the requested account
             elif check_arguments(arguments, 3, 2,'transaction', 'get'):
                 is_logged_in()
-                print(f'RECEIVED A GET REQUEST FROM CLIENT TO RETRIEVE TRANSACTIONS FOR ACCOUNT WITH ID = {arguments[2]}.')
+                print(f'RECEIVED A GET REQUEST FROM CLIENT TO RETRIEVE '
+                      f'TRANSACTIONS FOR ACCOUNT WITH ID = {arguments[2]}.')
                 transactions = self.bank.current_customer.get_transactions(arguments[2])
-                if transactions:
-                    response = f'success|{"|".join(transactions)}'
-                elif not transactions:
-                    raise ValueError(f'No transactions for account with id {arguments[2]} were found.')
+                response = f'success|{"|".join(transactions)}'
 
             # Modify account and insert transaction
             elif check_arguments(arguments, 4, 2, 'transaction', 'put'):
-                print(f'RECEIVED A REQUEST FROM CLIENT TO PERFORM A TRANSACTION ON ACCOUNT WITH ID = {arguments[2]}.')
+                print(f'RECEIVED A REQUEST FROM CLIENT TO PERFORM '
+                      f'A TRANSACTION ON ACCOUNT WITH ID = {arguments[2]}.')
                 is_logged_in()
                 response = f'success|{self.bank.current_customer.perform_transaction(arguments[2], arguments[3])}'
 
             elif check_arguments(arguments, 6, 2, 'customer', 'post'):
-                print(f'RECEIVED A REQUEST FROM CLIENT TO CREATE A NEW CUSTOMER WITH FIRST NAME {arguments[2]},'
-                      f' LAST NAME {arguments[3]}, EMAIL {arguments[4]}, AND PASSWORD {"*" * len(arguments[5])}.')
+                print(f'RECEIVED A REQUEST FROM CLIENT TO CREATE A NEW CUSTOMER'
+                      f'WITH FIRST NAME {arguments[2]}, LAST NAME {arguments[3]}, '
+                      f'EMAIL {arguments[4]}, AND PASSWORD {"*" * len(arguments[5])}.')
                 if no_duplicate_login(arguments[1]):
                     self.bank.add_customer(arguments[2], arguments[3], arguments[4], arguments[5])
                     self.bank.login(arguments[4], arguments[5])
                     response = 'success|'
 
             elif check_arguments(arguments, 3, 2, 'account', 'post'):
-                print(f'RECEIVED A REQUEST FROM CLIENT TO CREATE A NEW ACCOUNT WITH TYPE {arguments[2]}.')
+                print(f'RECEIVED A REQUEST FROM CLIENT TO CREATE '
+                      f'A NEW ACCOUNT WITH TYPE {arguments[2]}.')
                 is_logged_in()
                 response = f'success|{self.bank.current_customer.add_account(arguments[2])}'
 
             elif check_arguments(arguments, 4, 1, 'transfer'):
-                print(f'RECEIVED A TRANSFER REQUEST FROM CLIENT TO TRANSFER {arguments[3]} FROM ACCOUNT {arguments[1]} '
-                      f'TO ACCOUNT {arguments[2]}')
+                print(f'RECEIVED A TRANSFER REQUEST FROM CLIENT TO TRANSFER {arguments[3]} '
+                      f'FROM ACCOUNT {arguments[1]} TO ACCOUNT {arguments[2]}')
                 is_logged_in()
                 response = f'success|{self.bank.current_customer.transfer(arguments[1], arguments[2], float(arguments[3]))}'
 
             # Logout
             elif check_arguments(arguments, 1, 1, 'logout'):
-                print(f'RECEIVED A LOGOUt REQUEST FROM THE CLIENT.')
+                print('RECEIVED A LOGOUt REQUEST FROM THE CLIENT.')
                 is_logged_in()
                 response = f'{self.bank.logout()}'
 
