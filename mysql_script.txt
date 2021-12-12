@@ -1,0 +1,34 @@
+# CREATE AND SELECT THE DATABASE
+CREATE DATABASE IF NOT EXISTS test;
+use test;
+
+# CUSTOMER TABLE DECLARATION
+CREATE TABLE IF NOT EXISTS customer(
+cust_fname VARCHAR(50),
+cust_lname VARCHAR(50),
+cust_email VARCHAR(50),
+cust_pass VARCHAR(20),
+PRIMARY KEY (cust_email)
+);
+
+# ACCOUNT TABLE DECLARATION
+CREATE TABLE IF NOT EXISTS account(
+acc_type VARCHAR(10),
+acc_rate FLOAT,
+acc_limit FLOAT,
+acc_balance FLOAT,
+acc_id INT AUTO_INCREMENT,
+acc_email VARCHAR(50),
+PRIMARY KEY (acc_id),
+FOREIGN KEY (acc_email) REFERENCES customer(cust_email)
+);
+
+# TRANSACTION TABLE DECLARATION
+CREATE TABLE transaction(
+trans_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+trans_amount FLOAT,
+trans_account_id INT,
+trans_id INT AUTO_INCREMENT,
+PRIMARY KEY (trans_id),
+FOREIGN KEY (trans_account_id) REFERENCES account(acc_id)
+);
