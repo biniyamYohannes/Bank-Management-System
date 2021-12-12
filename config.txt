@@ -1,0 +1,21 @@
+### MySQL Server configuration:
+- PyCharm's Database Navigator plugin was used to connect to a MySQL server with the following configuration:
+	hostname: localhost
+	port 3306 
+	user root 
+	password: password 
+	database: test
+- the statements used to create the database and tables can be found in the mysql_script.txt file
+
+### Python configuration:
+- Python 3.8
+- the 3920TeamProject/Server directory can be opened in PyCharm
+- the 3920TeamProject/Server/src directory should be marked as Sources Root
+- the 'mysql-connector-python' package version 8.0.27 should be installed
+- run 3920TeamProject/Server/src/server/server_app.py to launch the server
+
+### Java configuration:
+- Java 8
+- 3920TeamProject/Server/BankGUI directory can be opened in IntelliJ
+- the 3920TeamProject/BankGUI/src directory should be marked as Sources Root
+- run 3920TeamProject/BankGUI/src/finalproject/application/Main.java to launch the Client
