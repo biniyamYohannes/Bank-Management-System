@@ -120,8 +120,8 @@ class ClientWorker(Thread):
                 return True
 
         client_message = self.receive_message()
-        arguments = client_message.split('|')      # used for local python client testing
-        # arguments = client_message[:-2].split('|')  # java sends commands with a \n character at the end
+        # arguments = client_message.split('|')      # used for local python client testing
+        arguments = client_message[:-2].split('|')  # java sends commands with a \n character at the end
 
         try:
             # Login
@@ -166,15 +166,15 @@ class ClientWorker(Thread):
             elif check_arguments(arguments, 6, 2, 'customer', 'post'):
                 print(f'RECEIVED A REQUEST FROM CLIENT TO CREATE A NEW CUSTOMER WITH FIRST NAME {arguments[2]},'
                       f' LAST NAME {arguments[3]}, EMAIL {arguments[4]}, AND PASSWORD {"*" * len(arguments[5])}.')
-                self.bank.add_customer(arguments[2], arguments[3], arguments[4], arguments[5])
-                response = 'success|'
+                if no_duplicate_login(arguments[1]):
+                    self.bank.add_customer(arguments[2], arguments[3], arguments[4], arguments[5])
+                    self.bank.login(arguments[4], arguments[5])
+                    response = 'success|'
 
-            elif check_arguments(arguments, 5, 2, 'account', 'post'):
-                print(f'RECEIVED A REQUEST FROM CLIENT TO CREATE A NEW ACCOUNT WITH TYPE {arguments[2]}, '
-                      f'RATE {arguments[3]}, LIMIT {arguments[4]}.')
+            elif check_arguments(arguments, 3, 2, 'account', 'post'):
+                print(f'RECEIVED A REQUEST FROM CLIENT TO CREATE A NEW ACCOUNT WITH TYPE {arguments[2]}.')
                 is_logged_in()
-                self.bank.current_customer.add_account(arguments[2], arguments[3], arguments[4])
-                response = 'success|'
+                response = f'success|{self.bank.current_customer.add_account(arguments[2])}'
 
             elif check_arguments(arguments, 4, 1, 'transfer'):
                 print(f'RECEIVED A TRANSFER REQUEST FROM CLIENT TO TRANSFER {arguments[3]} FROM ACCOUNT {arguments[1]} '

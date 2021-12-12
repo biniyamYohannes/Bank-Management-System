@@ -1,4 +1,4 @@
-from server import Server, MultiServer
+from server import MultiServer
 
 if __name__ == "__main__":
     server = MultiServer('First Bank', 'localhost', 10000, 5)
