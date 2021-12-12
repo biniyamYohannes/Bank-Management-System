@@ -6,7 +6,7 @@ public class Account {
     private final String id;
     private final String type;
     private float balance;
-    private final ArrayList<Transaction> transactions;
+    private ArrayList<Transaction> transactions;
 
     public Account(String id, String type, float balance, ArrayList<Transaction> transactions) {
         this.id = id;
@@ -30,6 +30,11 @@ public class Account {
     public void addTransaction(Transaction transaction) {
         this.transactions.add(transaction);
         this.balance += transaction.getAmount();
+    }
+
+    public void update(Account account) {
+        this.balance = account.balance;
+        this.transactions = account.transactions;
     }
 
     @Override

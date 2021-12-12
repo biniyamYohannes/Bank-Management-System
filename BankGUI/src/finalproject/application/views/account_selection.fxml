@@ -27,5 +27,6 @@
             <Font size="24.0" />
          </font>
       </Label>
+      <Button fx:id="btnRefresh" layoutX="509.0" layoutY="80.0" mnemonicParsing="false" onAction="#loadAccountSelection" text="Refresh" />
    </children>
 </AnchorPane>

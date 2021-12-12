@@ -54,6 +54,7 @@ public class Controller {
     public Button btnDeposit;
     public Button btnPay;
     public Button btnTransfer;
+    public Button btnRefresh;
     public Button btnLogout;
 
     public Controller() {
@@ -133,6 +134,7 @@ public class Controller {
 
     // Loads the account selection scene.
     public void loadAccountSelection(ActionEvent actionEvent) throws IOException {
+        this.getAccounts();
         this.loadScene(actionEvent, "account_selection.fxml");
     }
 
@@ -143,6 +145,8 @@ public class Controller {
 
     // Loads the main account scene.
     public void loadAccountMain(ActionEvent actionEvent) throws IOException {
+        Account updatedAccount = this.getAccount(currentAccount.getID());
+        currentAccount.update(updatedAccount);
         this.loadScene(actionEvent, currentAccount.getType() + "_main.fxml");
     }
 
@@ -217,7 +221,7 @@ public class Controller {
                 Controller.email = respArgs[3];
 
                 // load the user's accounts
-                this.getAccounts();
+                // this.getAccounts();
 
                 // load the account selection scene
                 this.loadAccountSelection(actionEvent);

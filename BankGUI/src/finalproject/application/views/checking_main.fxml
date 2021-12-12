@@ -29,5 +29,6 @@
       </Label>
       <Button fx:id="btnLogout" layoutX="524.0" layoutY="18.0" mnemonicParsing="false" onAction="#logout" text="Logout" />
       <Button fx:id="btnTransfer" layoutX="191.0" layoutY="83.0" mnemonicParsing="false" onAction="#loadTransfer" prefHeight="26.0" prefWidth="70.0" text="Transfer" />
+      <Button fx:id="btnRefresh" layoutX="506.0" layoutY="344.0" mnemonicParsing="false" onAction="#loadAccountMain" text="Refresh" />
    </children>
 </AnchorPane>

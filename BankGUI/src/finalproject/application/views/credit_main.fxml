@@ -27,5 +27,6 @@
             </font>
         </Label>
       <Button fx:id="btnLogout" layoutX="520.0" layoutY="18.0" mnemonicParsing="false" onAction="#logout" text="Logout" />
+      <Button fx:id="btnRefresh" layoutX="500.0" layoutY="344.0" mnemonicParsing="false" onAction="#loadAccountMain" text="Refresh" />
     </children>
 </AnchorPane>
