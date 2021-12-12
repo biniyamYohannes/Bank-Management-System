@@ -1,5 +1,5 @@
 .idea/
-python/.idea/
-python/__pycache__/
+Server/src/.idea/
+Server/src/__pycache__/
 BankGUI/out/
 .DS_Store

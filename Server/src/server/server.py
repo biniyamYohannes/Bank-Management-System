@@ -130,7 +130,7 @@ class ClientWorker(Thread):
             return True
 
         client_message = self.receive_message()
-        # arguments = client_message.split('|')      # used for local python client testing
+        # arguments = client_message.split('|')      # used for local src client testing
         arguments = client_message[:-2].split('|')   # java message format
 
         try:

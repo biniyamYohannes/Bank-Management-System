@@ -16,7 +16,7 @@
         </Label>
         <ListView fx:id="listTransactions" layoutX="26.0" layoutY="145.0" prefHeight="187.0" prefWidth="535.0" />
         <Button fx:id="btnWithdraw" layoutX="25.0" layoutY="83.0" mnemonicParsing="false" onAction="#loadWithdraw" text="Withdraw" />
-        <Button fx:id="btnDeposit" layoutX="99.0" layoutY="83.0" mnemonicParsing="false" onAction="#loadDeposit" prefHeight="26.0" prefWidth="70.0" text="Deposit" />
+        <Button fx:id="btnDeposit" layoutX="105.0" layoutY="83.0" mnemonicParsing="false" onAction="#loadDeposit" prefHeight="26.0" prefWidth="70.0" text="Deposit" />
         <Label layoutX="25.0" layoutY="52.0" text="Account">
             <font>
                 <Font size="18.0" />
@@ -28,5 +28,7 @@
             </font>
         </Label>
       <Button fx:id="btnLogout" layoutX="521.0" layoutY="18.0" mnemonicParsing="false" onAction="#logout" text="Logout" />
+      <Button fx:id="btnTransfer" layoutX="183.0" layoutY="83.0" mnemonicParsing="false" onAction="#loadTransfer" prefHeight="26.0" prefWidth="70.0" text="Transfer" />
+      <Button fx:id="btnRefresh" layoutX="500.0" layoutY="344.0" mnemonicParsing="false" onAction="#loadAccountMain" text="Refresh" />
     </children>
 </AnchorPane>
