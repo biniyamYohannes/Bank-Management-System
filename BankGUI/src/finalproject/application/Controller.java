@@ -1,8 +1,6 @@
 package finalproject.application;
 
 import finalproject.application.models.Account;
-//import finalproject.application.models.CreditAccount;
-//import finalproject.application.models.SavingsAccount;
 import finalproject.application.models.Transaction;
 import finalproject.client.Client;
 import javafx.collections.FXCollections;
@@ -15,9 +13,7 @@ import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import java.io.IOException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,6 +40,7 @@ public class Controller {
     public TextField txtSSN;
     public PasswordField txtPassword;
     public TextField txtAmount;
+    public TextField txtAccountID;
     public Label labelFirstName;
     public Label labelAccount;
     public ListView<Account> listAccounts;
@@ -56,6 +53,7 @@ public class Controller {
     public Button btnWithdraw;
     public Button btnDeposit;
     public Button btnPay;
+    public Button btnTransfer;
     public Button btnLogout;
 
     public Controller() {
@@ -161,6 +159,11 @@ public class Controller {
     // Loads the credit payment scene.
     public void loadPayment(ActionEvent actionEvent) throws IOException {
         this.loadScene(actionEvent, "credit_payment.fxml");
+    }
+
+    // Loads the account transfer scene.
+    public void loadTransfer(ActionEvent actionEvent) throws IOException {
+        this.loadScene(actionEvent, "account_transfer.fxml");
     }
 
 // Client-server communication handlers --------------------------------------------------------------------------------
@@ -317,24 +320,12 @@ public class Controller {
                 // get the server's responses
                 float balance = Float.parseFloat(respArgs[1]);
                 String accountType = respArgs[2];
-                // float rate = Float.parseFloat(respArgs[3]);
 
                 // get the account's transactions
                 ArrayList<Transaction> transactions = this.getTransactions(accountID);
 
+                // create the account
                 account = new Account(accountID, accountType, balance, transactions);
-
-//                // create account depending on type
-//                switch (accountType) {
-//                    case "savings":
-//                        account = new SavingsAccount(accountID, accountType, balance, transactions, rate);
-//                        break;
-//                    case "credit":
-//                        account = new CreditAccount(accountID, accountType, balance, transactions, rate);
-//                        break;
-//                    default:
-//                        account = new Account(accountID, accountType, balance, transactions, rate);
-//                }
                 break;
 
             case "fail":
@@ -369,10 +360,6 @@ public class Controller {
         String firstName = txtFirstName.getText();
         String lastName = txtLastName.getText();
         String email = txtEmail.getText();
-        String ssn = txtSSN.getText();
-        LocalDate dob = dpDOB.getValue();
-        String address = txtAddress.getText();
-        String phone = txtPhone.getText();
         String password = txtPassword.getText();
 
         // send create customer request to the server and receive server's response.
@@ -445,7 +432,7 @@ public class Controller {
         if (actionEvent.getSource() == this.btnWithdraw)
             amount *= -1;
 
-        // send transaction request to the server and receive server's response.
+        // send transaction request to the server and receive server's response
         String cmd = String.format("transaction|put|%s|%f", currentAccount.getID(), amount);
         String response = sendCommand(cmd);
 
@@ -456,6 +443,31 @@ public class Controller {
                 currentAccount.addTransaction(new Transaction(LocalDateTime.now(), amount));
                 this.loadAccountMain(actionEvent);
                 this.successAlert("Transaction successful.");
+                break;
+
+            case "fail":
+                this.failAlert(respArgs[1]);
+                break;
+        }
+    }
+
+    public void transfer(ActionEvent actionEvent) throws IOException {
+        // get the user-inputted values
+        String otherID = this.txtAccountID.getText();
+        float amount = Float.parseFloat(this.txtAmount.getText());
+
+        // send transfer request to the server and receive server's response
+        String cmd = String.format("transfer|%s|%s|%f", currentAccount.getID(), otherID, amount);
+        String response = sendCommand(cmd);
+
+        // perform actions based on server's response
+        String[] respArgs = response.split("\\|");
+        switch (respArgs[0]) {
+            case "success":
+                currentAccount.addTransaction(new Transaction(LocalDateTime.now(), amount*(-1)));
+                this.getAccounts();
+                this.loadAccountMain(actionEvent);
+                this.successAlert("Transfer successful.");
                 break;
 
             case "fail":
@@ -490,9 +502,5 @@ public class Controller {
                 this.failAlert(respArgs[1]);
                 break;
         }
-    }
-
-    public void exitApplication(ActionEvent event) {
-
     }
 }
